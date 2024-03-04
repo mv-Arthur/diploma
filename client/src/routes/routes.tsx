@@ -7,12 +7,15 @@ import UserPage from "../pages/UserPage";
 
 import PublicRoutes from "./publicRoutes";
 import PrivateRoutes from "./privateRotes";
-const CustomRouter: React.FC = () => {
+
+type PropsType = {
+	isAuth: boolean;
+};
+
+const CustomRouter: React.FC<PropsType> = (props) => {
 	const { store } = useContext(Context);
-	React.useEffect(() => {
-		if (localStorage.getItem("token")) (async () => await store.checkAuth())();
-	}, []);
-	return <>{store.isAuth ? <PrivateRoutes /> : <PublicRoutes />}</>;
+
+	return <>{props.isAuth ? <PrivateRoutes /> : <PublicRoutes />}</>;
 };
 
 export default observer(CustomRouter);

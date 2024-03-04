@@ -108,116 +108,62 @@ let UserController = class UserController {
             return res.json({ message: "непредвиденная ошибка", status: common_1.HttpStatus.BAD_REQUEST });
         }
     }
-    users() {
-        return this.userService.getUsers();
-    }
     async addOrder(dto, file, userId) {
-        try {
-            await this.orderService.addOrder(userId, file, dto);
-            return {
-                status: 200,
-                message: "Успех",
-            };
-        }
-        catch (err) {
-            return {
-                message: err.message,
-                status: err.status,
-            };
-        }
+        const order = await this.orderService.addOrder(userId, file, dto);
+        return order;
+    }
+    async getOrder(id) {
+        return await this.orderService.getOrderById(id);
+    }
+    async getAllOrder() {
+        return await this.orderService.getAllOrder();
     }
     async activateAdmin(activationAdminLink) {
-        try {
-            await this.userService.activateAdmin(activationAdminLink);
-            return {
-                status: 200,
-                message: "Успех",
-            };
-        }
-        catch (err) {
-            return {
-                status: err.status,
-                message: err.message,
-            };
-        }
+        await this.userService.activateAdmin(activationAdminLink);
+        return {
+            message: "Успех",
+        };
     }
     async setPrice(dto) {
-        try {
-            await this.orderService.setPrice(dto.id, dto.price);
-            return {
-                status: 200,
-                message: "Успех",
-            };
-        }
-        catch (err) {
-            return {
-                status: err.status,
-                message: err.message,
-            };
-        }
+        await this.orderService.setPrice(dto.id, dto.price);
+        return {
+            message: "Успех",
+        };
     }
     async setStatus(dto) {
-        try {
-            const { id, status } = dto;
-            if (!["pending", "job", "resolved"].includes(status)) {
-                throw new common_1.HttpException("неверный статус", common_1.HttpStatus.BAD_REQUEST);
-            }
-            await this.orderService.setStatus(id, status);
-            return {
-                status: 200,
-                message: "Успех",
-            };
+        const { id, status } = dto;
+        if (!["pending", "job", "resolved"].includes(status)) {
+            throw new common_1.HttpException("неверный статус", common_1.HttpStatus.BAD_REQUEST);
         }
-        catch (err) {
-            return {
-                status: err.status,
-                message: err.message,
-            };
-        }
+        await this.orderService.setStatus(id, status);
+        return {
+            message: "Успех",
+        };
     }
     async updateDescription(dto) {
-        try {
-            const { id, description } = dto;
-            await this.orderService.updateDescription(id, description);
-            return {
-                status: 200,
-                message: "Успех",
-            };
-        }
-        catch (err) {
-            return {
-                status: err.status,
-                message: err.message,
-            };
-        }
+        const { id, description } = dto;
+        await this.orderService.updateDescription(id, description);
+        return {
+            message: "Успех",
+        };
     }
     async createType(dto) {
-        try {
-            const { name, type } = dto;
-            await this.orderService.createType(name, type);
-            return {
-                status: 200,
-                message: "Успех",
-            };
-        }
-        catch (err) {
-            return {
-                status: err.status,
-                message: err.message,
-            };
-        }
+        const { name, type } = dto;
+        const newType = await this.orderService.createType(name, type);
+        return {
+            message: "Успех",
+            data: newType,
+        };
     }
     async download(orderId, res) {
-        try {
-            const file = await this.orderService.download(orderId);
-            res.sendFile(file);
-        }
-        catch (err) {
-            return {
-                status: err.status,
-                message: err.message,
-            };
-        }
+        const file = await this.orderService.download(orderId);
+        res.download(file);
+    }
+    async getTypeAll() {
+        return this.orderService.getAllType();
+    }
+    async deleteTypeById(id) {
+        return await this.orderService.deleteType(id);
     }
 };
 exports.UserController = UserController;
@@ -265,13 +211,6 @@ __decorate([
 ], UserController.prototype, "refresh", null);
 __decorate([
     (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
-    (0, common_1.Get)("/users"),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", []),
-    __metadata("design:returntype", void 0)
-], UserController.prototype, "users", null);
-__decorate([
-    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
     (0, common_1.Post)("/addOrder/:id"),
     (0, common_1.UseInterceptors)((0, platform_express_1.FileInterceptor)("file")),
     __param(0, (0, common_1.Body)()),
@@ -281,6 +220,19 @@ __decorate([
     __metadata("design:paramtypes", [addOrder_dto_1.AddOrderDto, Object, Number]),
     __metadata("design:returntype", Promise)
 ], UserController.prototype, "addOrder", null);
+__decorate([
+    (0, common_1.Get)("/getOrder/:id"),
+    __param(0, (0, common_1.Param)("id")),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Number]),
+    __metadata("design:returntype", Promise)
+], UserController.prototype, "getOrder", null);
+__decorate([
+    (0, common_1.Get)("/getOrder"),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", []),
+    __metadata("design:returntype", Promise)
+], UserController.prototype, "getAllOrder", null);
 __decorate([
     (0, common_1.Get)("/activate/admin/:link"),
     __param(0, (0, common_1.Param)("link")),
@@ -321,7 +273,6 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], UserController.prototype, "createType", null);
 __decorate([
-    (0, common_1.UseGuards)(role_guard_1.RoleGuard),
     (0, common_1.Get)("/download/:id"),
     __param(0, (0, common_1.Param)("id")),
     __param(1, (0, common_1.Res)()),
@@ -329,6 +280,21 @@ __decorate([
     __metadata("design:paramtypes", [Number, Object]),
     __metadata("design:returntype", Promise)
 ], UserController.prototype, "download", null);
+__decorate([
+    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
+    (0, common_1.Get)("/types"),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", []),
+    __metadata("design:returntype", Promise)
+], UserController.prototype, "getTypeAll", null);
+__decorate([
+    (0, common_1.UseGuards)(role_guard_1.RoleGuard),
+    (0, common_1.Delete)("/types/:id"),
+    __param(0, (0, common_1.Param)("id")),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Number]),
+    __metadata("design:returntype", Promise)
+], UserController.prototype, "deleteTypeById", null);
 exports.UserController = UserController = __decorate([
     (0, common_1.Controller)("user"),
     __metadata("design:paramtypes", [user_service_1.UserService,

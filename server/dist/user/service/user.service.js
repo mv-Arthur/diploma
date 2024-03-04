@@ -118,10 +118,6 @@ let UserService = class UserService {
             user: userDto,
         };
     }
-    async getUsers() {
-        const users = await this.userRepository.findAll();
-        return users.map((el) => new user_dto_1.UserDto(el));
-    }
 };
 exports.UserService = UserService;
 exports.UserService = UserService = __decorate([

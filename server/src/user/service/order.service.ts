@@ -10,6 +10,7 @@ import { rename, stat } from "fs";
 import { AddOrderDto } from "../dto/addOrder.dto";
 import { StatusType } from "../types/StatusType";
 import { Type } from "../model/type.model";
+import { OrderDto } from "../dto/order.dto";
 @Injectable()
 export class OrderService {
 	constructor(
@@ -60,7 +61,10 @@ export class OrderService {
 		const order = await this.orderRepository.create({ description, userId });
 		const fileDB = await this.fileRepository.create({ path: filePath, type, orderId: order.id });
 		const status = await this.statusRepository.create({ orderId: order.id });
-		return;
+		const allTypes = await this.typeRepository.findAll();
+		const types = allTypes.find((type) => type.type === fileDB.type);
+
+		return new OrderDto(order, status, fileDB, types);
 	}
 
 	async setPrice(id: number, price: string) {
@@ -125,10 +129,12 @@ export class OrderService {
 			throw new HttpException("такой тип уже имеется", HttpStatus.BAD_REQUEST);
 		}
 
-		await this.typeRepository.create({
+		const newType = await this.typeRepository.create({
 			name,
 			type,
 		});
+
+		return newType;
 	}
 
 	async download(id: number) {
@@ -137,5 +143,53 @@ export class OrderService {
 		const file = await this.fileRepository.findOne({ where: { orderId: order.id } });
 		if (!file) throw new HttpException("файл не найден", HttpStatus.BAD_REQUEST);
 		return file.path;
+	}
+
+	async getAllType() {
+		const types = await this.typeRepository.findAll();
+		return types;
+	}
+
+	async deleteType(id: number) {
+		const type = await this.typeRepository.findOne({ where: { id } });
+		if (!type) throw new HttpException("типы не найдены", HttpStatus.BAD_REQUEST);
+		const delCount = await this.typeRepository.destroy({ where: { id: type.id } });
+		if (!delCount) {
+			throw new HttpException("типы не найдены", HttpStatus.BAD_REQUEST);
+		}
+		return {
+			deletedTypeId: type.id,
+		};
+	}
+
+	async getOrderById(id: number) {
+		const user = await this.userRepository.findOne({ where: { id } });
+		if (!user) throw new HttpException("пользователь не найден", HttpStatus.BAD_REQUEST);
+		const orders = await this.orderRepository.findAll({
+			where: { userId: user.id },
+			include: { all: true },
+		});
+
+		if (!orders) throw new HttpException("заявки не найдены", HttpStatus.BAD_REQUEST);
+		const types = await this.typeRepository.findAll();
+		if (!types) throw new HttpException("типы не найдены", HttpStatus.BAD_REQUEST);
+
+		return orders.map((order) => {
+			const status = order.status;
+			const file = order.file;
+			const type = types.find((type) => type.type === file.type);
+
+			return new OrderDto(order, status, file, type);
+		});
+	}
+
+	async getAllOrder() {
+		const users = await this.userRepository.findAll({
+			include: {
+				model: Order,
+				include: [Status, File],
+			},
+		});
+		return users;
 	}
 }

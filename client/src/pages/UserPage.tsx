@@ -4,13 +4,24 @@ import { observer } from "mobx-react-lite";
 import { AuthService } from "../services/AuthService";
 import { useNavigate } from "react-router-dom";
 import { Context } from "..";
-
+import { SetTypeSelect } from "../components/SetTypeSelect";
+import { typeStore } from "../store/typeStore";
+import Button from "@mui/material/Button";
+import Typography from "@mui/material/Typography";
+import TextField from "@mui/material/TextField";
+import { CreateOrderForm } from "../components/CreateOrderForm";
+import { OrderArea } from "../components/OrderArea";
+import { orderStore } from "../store/orderStore";
 const UserPage: React.FC = () => {
 	const navigate = useNavigate();
 	const { store } = useContext(Context);
 
 	React.useEffect(() => {
-		(async () => await store.checkAuth())();
+		(async () => {
+			await store.checkAuth();
+			await typeStore.fetchTypes();
+			await orderStore.fetchOrders(store.user.id);
+		})();
 	}, []);
 
 	return (
@@ -19,25 +30,26 @@ const UserPage: React.FC = () => {
 				"загрузка"
 			) : (
 				<>
-					<h2>Приветствую, вы авторизованы как {store.user.email}</h2>
-					<h3>Вы {store.user.role === "admin" ? "администратор" : "пользователь"}</h3>
-					<p>
+					<Typography>Приветствую, вы авторизованы как {store.user.email}</Typography>
+					<Typography>Вы пользователь</Typography>
+					<Typography>
 						{store.user.isActivated
 							? "подтвержденный аккаунт"
 							: "пожалуйста, перейдите на почту и подтвердите аккаунт"}
-					</p>
-					<button
+					</Typography>
+					<Button
+						variant="contained"
 						onClick={async () => {
 							await store.logout();
 							navigate("/");
 						}}
 					>
 						выход
-					</button>
+					</Button>
 
-					<input type="file" placeholder="загрузите файл" />
-					<input type="text" placeholder="введите описание" />
-					<select name="выберете тип" id=""></select>
+					<CreateOrderForm />
+
+					<OrderArea />
 				</>
 			)}
 		</div>

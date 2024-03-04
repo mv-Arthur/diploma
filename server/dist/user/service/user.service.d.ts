@@ -25,5 +25,4 @@ export declare class UserService {
         accessToken: string;
         refreshToken: string;
     }>;
-    getUsers(): Promise<UserDto[]>;
 }

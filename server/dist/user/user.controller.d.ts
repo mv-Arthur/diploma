@@ -17,33 +17,28 @@ export declare class UserController {
     logout(req: Request, res: Response): Promise<Response<any, Record<string, any>>>;
     activate(activationLink: string, res: Response): Promise<void | Response<any, Record<string, any>>>;
     refresh(req: Request, res: Response): Promise<Response<any, Record<string, any>>>;
-    users(): Promise<import("./dto/user.dto").UserDto[]>;
-    addOrder(dto: AddOrderDto, file: Express.Multer.File, userId: number): Promise<{
-        message: any;
-        status: any;
-    }>;
+    addOrder(dto: AddOrderDto, file: Express.Multer.File, userId: number): Promise<import("./dto/order.dto").OrderDto>;
+    getOrder(id: number): Promise<import("./dto/order.dto").OrderDto[]>;
+    getAllOrder(): Promise<import("./model/user.model").User[]>;
     activateAdmin(activationAdminLink: string): Promise<{
-        status: any;
-        message: any;
+        message: string;
     }>;
     setPrice(dto: SetPriceDto): Promise<{
-        status: any;
-        message: any;
+        message: string;
     }>;
     setStatus(dto: SetStatusDto): Promise<{
-        status: any;
-        message: any;
+        message: string;
     }>;
     updateDescription(dto: updateDescriptionDto): Promise<{
-        status: any;
-        message: any;
+        message: string;
     }>;
     createType(dto: CreateTypeDto): Promise<{
-        status: any;
-        message: any;
+        message: string;
+        data: import("./model/type.model").Type;
     }>;
-    download(orderId: number, res: Response): Promise<{
-        status: any;
-        message: any;
+    download(orderId: number, res: Response): Promise<void>;
+    getTypeAll(): Promise<import("./model/type.model").Type[]>;
+    deleteTypeById(id: number): Promise<{
+        deletedTypeId: any;
     }>;
 }

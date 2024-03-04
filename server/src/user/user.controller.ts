@@ -13,6 +13,7 @@ import {
 	UploadedFile,
 	Patch,
 	HttpException,
+	Delete,
 } from "@nestjs/common";
 import { Response, Request } from "express";
 import { UserService } from "./service/user.service";
@@ -118,12 +119,6 @@ export class UserController {
 	}
 
 	@UseGuards(JwtAuthGuard)
-	@Get("/users")
-	users() {
-		return this.userService.getUsers();
-	}
-
-	@UseGuards(JwtAuthGuard)
 	@Post("/addOrder/:id")
 	@UseInterceptors(FileInterceptor("file"))
 	async addOrder(
@@ -131,120 +126,88 @@ export class UserController {
 		@UploadedFile() file: Express.Multer.File,
 		@Param("id") userId: number
 	) {
-		try {
-			await this.orderService.addOrder(userId, file, dto);
-			return {
-				status: 200,
-				message: "Успех",
-			};
-		} catch (err) {
-			return {
-				message: err.message,
-				status: err.status,
-			};
-		}
+		const order = await this.orderService.addOrder(userId, file, dto);
+		return order;
 	}
 
+	@Get("/getOrder/:id")
+	async getOrder(@Param("id") id: number) {
+		return await this.orderService.getOrderById(id);
+	}
+
+	@Get("/getOrder")
+	async getAllOrder() {
+		return await this.orderService.getAllOrder();
+	}
+	// @UseGuards(JwtAuthGuard)
 	@Get("/activate/admin/:link")
 	async activateAdmin(@Param("link") activationAdminLink: string) {
-		try {
-			await this.userService.activateAdmin(activationAdminLink);
-			return {
-				status: 200,
-				message: "Успех",
-			};
-		} catch (err) {
-			return {
-				status: err.status,
-				message: err.message,
-			};
-		}
+		await this.userService.activateAdmin(activationAdminLink);
+		return {
+			message: "Успех",
+		};
 	}
 
 	@UseGuards(RoleGuard)
 	@Patch("/setPrice")
 	async setPrice(@Body() dto: SetPriceDto) {
-		try {
-			await this.orderService.setPrice(dto.id, dto.price);
-			return {
-				status: 200,
-				message: "Успех",
-			};
-		} catch (err) {
-			return {
-				status: err.status,
-				message: err.message,
-			};
-		}
+		await this.orderService.setPrice(dto.id, dto.price);
+		return {
+			message: "Успех",
+		};
 	}
 
 	@UseGuards(RoleGuard)
 	@Patch("/setStatus")
 	async setStatus(@Body() dto: SetStatusDto) {
-		try {
-			const { id, status } = dto;
-			if (!["pending", "job", "resolved"].includes(status)) {
-				throw new HttpException("неверный статус", HttpStatus.BAD_REQUEST);
-			}
-			await this.orderService.setStatus(id, status);
-			return {
-				status: 200,
-				message: "Успех",
-			};
-		} catch (err) {
-			return {
-				status: err.status,
-				message: err.message,
-			};
+		const { id, status } = dto;
+		if (!["pending", "job", "resolved"].includes(status)) {
+			throw new HttpException("неверный статус", HttpStatus.BAD_REQUEST);
 		}
+		await this.orderService.setStatus(id, status);
+		return {
+			message: "Успех",
+		};
 	}
 
 	@UseGuards(JwtAuthGuard)
 	@Patch("/updateDescription")
 	async updateDescription(@Body() dto: updateDescriptionDto) {
-		try {
-			const { id, description } = dto;
-			await this.orderService.updateDescription(id, description);
-			return {
-				status: 200,
-				message: "Успех",
-			};
-		} catch (err) {
-			return {
-				status: err.status,
-				message: err.message,
-			};
-		}
-	}
-	@UseGuards(RoleGuard)
-	@Post("/createType")
-	async createType(@Body() dto: CreateTypeDto) {
-		try {
-			const { name, type } = dto;
-			await this.orderService.createType(name, type);
-			return {
-				status: 200,
-				message: "Успех",
-			};
-		} catch (err) {
-			return {
-				status: err.status,
-				message: err.message,
-			};
-		}
+		const { id, description } = dto;
+		await this.orderService.updateDescription(id, description);
+		return {
+			message: "Успех",
+		};
 	}
 
 	@UseGuards(RoleGuard)
+	@Post("/createType")
+	async createType(@Body() dto: CreateTypeDto) {
+		const { name, type } = dto;
+		const newType = await this.orderService.createType(name, type);
+		return {
+			message: "Успех",
+			data: newType,
+		};
+	}
+
+	// @UseGuards(JwtAuthGuard)
 	@Get("/download/:id")
 	async download(@Param("id") orderId: number, @Res() res: Response) {
-		try {
-			const file = await this.orderService.download(orderId);
-			res.sendFile(file);
-		} catch (err) {
-			return {
-				status: err.status,
-				message: err.message,
-			};
-		}
+		const file = await this.orderService.download(orderId);
+
+		res.download(file);
+	}
+
+	@UseGuards(JwtAuthGuard)
+	@Get("/types")
+	async getTypeAll() {
+		return this.orderService.getAllType();
+	}
+
+	@UseGuards(RoleGuard)
+	@Delete("/types/:id")
+	async deleteTypeById(@Param("id") id: number) {
+		return await this.orderService.deleteType(id);
 	}
 }
