@@ -26,6 +26,7 @@ const setPrice_dto_1 = require("./dto/setPrice.dto");
 const setStatus_dto_1 = require("./dto/setStatus.dto");
 const updateDescription_dto_1 = require("./dto/updateDescription.dto");
 const createType_dto_1 = require("./dto/createType.dto");
+const webPush = require("web-push");
 let UserController = class UserController {
     constructor(userService, orderService) {
         this.userService = userService;
@@ -165,6 +166,16 @@ let UserController = class UserController {
     async deleteTypeById(id) {
         return await this.orderService.deleteType(id);
     }
+    async subscription(req, res) {
+        const body = req.body;
+        webPush.setVapidDetails("mailto:example@yourdomain.org", "BJrq3EQknklUpqlywGeRdEb0K77afRL6OD78Lqt_rE18IZ-7bUOrMzVymeURsnB3oZ8m2GUCfxJqCL72nHLkOXk", "TisUWleTJzlpss0S8r_7799vW1d_A78Y_rRVLa87jz0");
+        console.log(body);
+        await webPush.sendNotification(req.body, JSON.stringify({
+            title: "жопа жопа жопа",
+            descr: "говно хуй залупа",
+        }));
+        res.status(200).json("ok");
+    }
 };
 exports.UserController = UserController;
 __decorate([
@@ -295,6 +306,14 @@ __decorate([
     __metadata("design:paramtypes", [Number]),
     __metadata("design:returntype", Promise)
 ], UserController.prototype, "deleteTypeById", null);
+__decorate([
+    (0, common_1.Post)("/subscription"),
+    __param(0, (0, common_1.Req)()),
+    __param(1, (0, common_1.Res)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, Object]),
+    __metadata("design:returntype", Promise)
+], UserController.prototype, "subscription", null);
 exports.UserController = UserController = __decorate([
     (0, common_1.Controller)("user"),
     __metadata("design:paramtypes", [user_service_1.UserService,

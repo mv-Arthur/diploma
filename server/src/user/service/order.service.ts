@@ -178,8 +178,8 @@ export class OrderService {
 			const status = order.status;
 			const file = order.file;
 			const type = types.find((type) => type.type === file.type);
-
-			return new OrderDto(order, status, file, type);
+			if (type) return new OrderDto(order, status, file, type);
+			return null;
 		});
 	}
 
@@ -190,6 +190,31 @@ export class OrderService {
 				include: [Status, File],
 			},
 		});
-		return users;
+		const types = await this.typeRepository.findAll();
+
+		return users.map((user) => {
+			const { order } = user;
+
+			return {
+				id: user.id,
+				email: user.email,
+				order: order.map((order) => {
+					const { status, file } = order;
+					const foundedType = types.find((type) => type.type === file.type);
+					if (!foundedType)
+						return {
+							id: order.id,
+							description: null,
+							price: null,
+							status: null,
+							message: null,
+							file: null,
+							type: null,
+							name: null,
+						};
+					return new OrderDto(order, status, file, foundedType);
+				}),
+			};
+		});
 	}
 }

@@ -11,9 +11,15 @@ export const OrderArea = observer(() => {
 
 	return (
 		<div>
-			{orderStore.orders.map((order) => {
-				return <OrderComponent key={order.id} order={order} handleDownload={handleDownload} />;
-			})}
+			{orderStore.orders.length ? (
+				orderStore.orders.map((order) => {
+					return (
+						<OrderComponent key={order.id} order={order} handleDownload={handleDownload} />
+					);
+				})
+			) : (
+				<h2>заявок нет</h2>
+			)}
 		</div>
 	);
 });

@@ -168,7 +168,9 @@ let OrderService = class OrderService {
             const status = order.status;
             const file = order.file;
             const type = types.find((type) => type.type === file.type);
-            return new order_dto_1.OrderDto(order, status, file, type);
+            if (type)
+                return new order_dto_1.OrderDto(order, status, file, type);
+            return null;
         });
     }
     async getAllOrder() {
@@ -178,7 +180,30 @@ let OrderService = class OrderService {
                 include: [status_model_1.Status, file_model_1.File],
             },
         });
-        return users;
+        const types = await this.typeRepository.findAll();
+        return users.map((user) => {
+            const { order } = user;
+            return {
+                id: user.id,
+                email: user.email,
+                order: order.map((order) => {
+                    const { status, file } = order;
+                    const foundedType = types.find((type) => type.type === file.type);
+                    if (!foundedType)
+                        return {
+                            id: order.id,
+                            description: null,
+                            price: null,
+                            status: null,
+                            message: null,
+                            file: null,
+                            type: null,
+                            name: null,
+                        };
+                    return new order_dto_1.OrderDto(order, status, file, foundedType);
+                }),
+            };
+        });
     }
 };
 exports.OrderService = OrderService;

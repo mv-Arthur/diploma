@@ -9,6 +9,7 @@ import Paper from "@mui/material/Paper";
 import { typeStore } from "../store/typeStore";
 import { TypesArea } from "../components/TypesArea";
 import { orderStore } from "../store/orderStore";
+import { OrderAdmin } from "../components/OrderAdmin";
 const AdminPage = () => {
 	const navigate = useNavigate();
 	const { store } = useContext(Context);
@@ -48,6 +49,7 @@ const AdminPage = () => {
 			<CreateTypeForm />
 
 			<TypesArea />
+			<OrderAdmin />
 		</div>
 	);
 };

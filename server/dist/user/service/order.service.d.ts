@@ -26,5 +26,9 @@ export declare class OrderService {
         deletedTypeId: any;
     }>;
     getOrderById(id: number): Promise<OrderDto[]>;
-    getAllOrder(): Promise<User[]>;
+    getAllOrder(): Promise<{
+        id: number;
+        email: string;
+        order: OrderDto[];
+    }[]>;
 }

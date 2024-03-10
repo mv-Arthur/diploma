@@ -28,6 +28,8 @@ import { SetPriceDto } from "./dto/setPrice.dto";
 import { SetStatusDto } from "./dto/setStatus.dto";
 import { updateDescriptionDto } from "./dto/updateDescription.dto";
 import { CreateTypeDto } from "./dto/createType.dto";
+import * as webPush from "web-push";
+import { Json } from "sequelize/types/utils";
 @Controller("user")
 export class UserController {
 	constructor(
@@ -195,7 +197,6 @@ export class UserController {
 	@Get("/download/:id")
 	async download(@Param("id") orderId: number, @Res() res: Response) {
 		const file = await this.orderService.download(orderId);
-
 		res.download(file);
 	}
 
@@ -209,5 +210,26 @@ export class UserController {
 	@Delete("/types/:id")
 	async deleteTypeById(@Param("id") id: number) {
 		return await this.orderService.deleteType(id);
+	}
+
+	@Post("/subscription")
+	async subscription(@Req() req: any, @Res() res: Response) {
+		const body = req.body;
+		webPush.setVapidDetails(
+			"mailto:example@yourdomain.org",
+			"BJrq3EQknklUpqlywGeRdEb0K77afRL6OD78Lqt_rE18IZ-7bUOrMzVymeURsnB3oZ8m2GUCfxJqCL72nHLkOXk",
+			"TisUWleTJzlpss0S8r_7799vW1d_A78Y_rRVLa87jz0"
+		);
+
+		console.log(body);
+		await webPush.sendNotification(
+			req.body,
+			JSON.stringify({
+				title: "жопа жопа жопа",
+				descr: "говно хуй залупа",
+			})
+		);
+
+		res.status(200).json("ok");
 	}
 }

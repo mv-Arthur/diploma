@@ -19,7 +19,11 @@ export declare class UserController {
     refresh(req: Request, res: Response): Promise<Response<any, Record<string, any>>>;
     addOrder(dto: AddOrderDto, file: Express.Multer.File, userId: number): Promise<import("./dto/order.dto").OrderDto>;
     getOrder(id: number): Promise<import("./dto/order.dto").OrderDto[]>;
-    getAllOrder(): Promise<import("./model/user.model").User[]>;
+    getAllOrder(): Promise<{
+        id: number;
+        email: string;
+        order: import("./dto/order.dto").OrderDto[];
+    }[]>;
     activateAdmin(activationAdminLink: string): Promise<{
         message: string;
     }>;
@@ -41,4 +45,5 @@ export declare class UserController {
     deleteTypeById(id: number): Promise<{
         deletedTypeId: any;
     }>;
+    subscription(req: any, res: Response): Promise<void>;
 }

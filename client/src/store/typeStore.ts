@@ -6,7 +6,7 @@ class TypeStore {
 	types = [] as IOrderType[];
 	current = {} as IOrderType;
 	constructor() {
-		makeAutoObservable(this);
+		makeAutoObservable(this, {}, { deep: true });
 	}
 
 	addNewType(type: IOrderType) {
@@ -14,7 +14,7 @@ class TypeStore {
 	}
 
 	firstStepRender(data: IOrderType[]) {
-		this.types = [...this.types, ...data];
+		this.types = [...data];
 	}
 
 	deleteTypeById(id: number) {

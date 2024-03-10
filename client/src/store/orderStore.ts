@@ -18,13 +18,21 @@ class OrderStore {
 	}
 
 	async fetchOrders(userId: number) {
-		const orders = await OrderService.fetchOrders(userId);
-		this.addFetchedOrders(orders.data);
+		try {
+			const orders = await OrderService.fetchOrders(userId);
+			this.addFetchedOrders(orders.data);
+		} catch (err) {
+			console.log(err);
+		}
 	}
 
 	async fetchAddOrder(userId: number, formData: FormData) {
-		const response = await OrderService.addOrder(userId, formData);
-		this.addOrder(response.data);
+		try {
+			const response = await OrderService.addOrder(userId, formData);
+			this.addOrder(response.data);
+		} catch (err) {
+			console.log(err);
+		}
 	}
 }
 

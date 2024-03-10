@@ -19,11 +19,8 @@ export const CreateOrderForm = observer(() => {
 		formData.append("description", description);
 		formData.append("type", typeStore.current.type);
 		console.log(formData);
-		try {
-			await orderStore.fetchAddOrder(store.user.id, formData);
-		} catch (err) {
-			console.log(err);
-		}
+
+		await orderStore.fetchAddOrder(store.user.id, formData);
 	};
 
 	return (
