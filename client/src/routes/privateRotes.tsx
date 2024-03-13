@@ -20,6 +20,7 @@ const PrivateRoutes: React.FC = () => {
 				) : (
 					<Route path={"/user"} element={<AdminPage />} />
 				)}
+				<Route path={"/"} element={<LoginPage />} />
 			</Routes>
 		</div>
 	);

@@ -2,6 +2,8 @@ import { Model } from "sequelize-typescript";
 import { Token } from "./token.model";
 import { RoleType } from "../types/RoleType";
 import { Order } from "./order.model";
+import { Vapid } from "./vapid.model";
+import { Subscription } from "./subscription.model";
 interface CreationAttrs {
     email: string;
     password: string;
@@ -18,5 +20,7 @@ export declare class User extends Model<User, CreationAttrs> {
     role: RoleType;
     token: Token;
     order: Order[];
+    vapid: Vapid;
+    subscription: Subscription;
 }
 export {};

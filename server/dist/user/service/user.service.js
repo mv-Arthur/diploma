@@ -21,11 +21,18 @@ const bcrypt = require("bcrypt");
 const uuid_1 = require("uuid");
 const mail_service_1 = require("./mail.service");
 const token_service_1 = require("./token.service");
+const vapid_model_1 = require("../model/vapid.model");
+const webPush = require("web-push");
+const keys_model_1 = require("../model/keys.model");
+const subscription_model_1 = require("../model/subscription.model");
 let UserService = class UserService {
-    constructor(userRepository, mailService, tokenService) {
+    constructor(userRepository, mailService, tokenService, vapidRepository, keysRepository, subsciptionRepository) {
         this.userRepository = userRepository;
         this.mailService = mailService;
         this.tokenService = tokenService;
+        this.vapidRepository = vapidRepository;
+        this.keysRepository = keysRepository;
+        this.subsciptionRepository = subsciptionRepository;
     }
     async registration(email, password) {
         const candidate = await this.userRepository.findOne({ where: { email: email } });
@@ -46,10 +53,68 @@ let UserService = class UserService {
         const userDto = new user_dto_1.UserDto(user);
         const tokens = this.tokenService.generateToken({ ...userDto });
         await this.tokenService.saveToken(userDto.id, tokens.refreshToken);
+        const twins = webPush.generateVAPIDKeys();
+        await this.vapidRepository.create({
+            userId: userDto.id,
+            publicKey: twins.publicKey,
+            privateKey: twins.privateKey,
+        });
         return {
             ...tokens,
             user: userDto,
         };
+    }
+    async subscribe(sub, id) {
+        const subscription = await this.subsciptionRepository.create({
+            endpoint: sub.endpoint,
+            expirationTime: sub.expirationTime,
+            userId: id,
+        });
+        const keys = await this.keysRepository.create({
+            p256dh: sub.keys.p256dh,
+            auth: sub.keys.auth,
+            subscriptionId: subscription.id,
+        });
+    }
+    async resubscribe(sub, id) {
+        const subscription = await this.subsciptionRepository.findOne({
+            where: {
+                userId: id,
+            },
+        });
+        const keys = await this.keysRepository.findOne({
+            where: {
+                subscriptionId: subscription.id,
+            },
+        });
+        subscription.endpoint = sub.endpoint;
+        subscription.expirationTime = sub.expirationTime;
+        await subscription.save();
+        keys.p256dh = sub.keys.p256dh;
+        keys.auth = sub.keys.auth;
+        await keys.save();
+    }
+    async unsubscribe(id) {
+        const subscription = await this.subsciptionRepository.findOne({
+            where: {
+                userId: id,
+            },
+            include: {
+                all: true,
+            },
+        });
+        if (!subscription) {
+            throw new common_1.HttpException("подписка не найдена", common_1.HttpStatus.BAD_REQUEST);
+        }
+        return subscription;
+    }
+    async getPushKey(id) {
+        const keys = await this.vapidRepository.findOne({
+            where: { userId: id },
+        });
+        if (!keys)
+            throw new common_1.HttpException("ключи не найдены", common_1.HttpStatus.BAD_REQUEST);
+        return keys.publicKey;
     }
     async activate(activationLink) {
         const user = await this.userRepository.findOne({
@@ -123,7 +188,10 @@ exports.UserService = UserService;
 exports.UserService = UserService = __decorate([
     (0, common_1.Injectable)(),
     __param(0, (0, sequelize_1.InjectModel)(user_model_1.User)),
+    __param(3, (0, sequelize_1.InjectModel)(vapid_model_1.Vapid)),
+    __param(4, (0, sequelize_1.InjectModel)(keys_model_1.Keys)),
+    __param(5, (0, sequelize_1.InjectModel)(subscription_model_1.Subscription)),
     __metadata("design:paramtypes", [Object, mail_service_1.MailService,
-        token_service_1.TokenService])
+        token_service_1.TokenService, Object, Object, Object])
 ], UserService);
 //# sourceMappingURL=user.service.js.map

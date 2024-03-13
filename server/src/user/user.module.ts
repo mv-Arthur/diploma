@@ -16,6 +16,9 @@ import { OrderService } from "./service/order.service";
 import { MulterModule } from "@nestjs/platform-express";
 import { RoleGuard } from "./role.guard";
 import { Type } from "./model/type.model";
+import { Vapid } from "./model/vapid.model";
+import { Subscription } from "./model/subscription.model";
+import { Keys } from "./model/keys.model";
 
 @Module({
 	controllers: [UserController],
@@ -23,7 +26,17 @@ import { Type } from "./model/type.model";
 	imports: [
 		JwtModule.register({}),
 		ConfigModule,
-		SequelizeModule.forFeature([User, Token, Order, File, Status, Type]),
+		SequelizeModule.forFeature([
+			User,
+			Token,
+			Order,
+			File,
+			Status,
+			Type,
+			Vapid,
+			Subscription,
+			Keys,
+		]),
 		MulterModule.register({
 			dest: "./dist/user/uploads",
 		}),

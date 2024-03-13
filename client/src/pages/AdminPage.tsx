@@ -10,6 +10,8 @@ import { typeStore } from "../store/typeStore";
 import { TypesArea } from "../components/TypesArea";
 import { orderStore } from "../store/orderStore";
 import { OrderAdmin } from "../components/OrderAdmin";
+import axios from "axios";
+import { API_URL } from "../http";
 const AdminPage = () => {
 	const navigate = useNavigate();
 	const { store } = useContext(Context);

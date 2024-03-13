@@ -25,6 +25,9 @@ const order_service_1 = require("./service/order.service");
 const platform_express_1 = require("@nestjs/platform-express");
 const role_guard_1 = require("./role.guard");
 const type_model_1 = require("./model/type.model");
+const vapid_model_1 = require("./model/vapid.model");
+const subscription_model_1 = require("./model/subscription.model");
+const keys_model_1 = require("./model/keys.model");
 let UserModule = class UserModule {
 };
 exports.UserModule = UserModule;
@@ -35,7 +38,17 @@ exports.UserModule = UserModule = __decorate([
         imports: [
             jwt_1.JwtModule.register({}),
             config_1.ConfigModule,
-            sequelize_1.SequelizeModule.forFeature([user_model_1.User, token_model_1.Token, order_model_1.Order, file_model_1.File, status_model_1.Status, type_model_1.Type]),
+            sequelize_1.SequelizeModule.forFeature([
+                user_model_1.User,
+                token_model_1.Token,
+                order_model_1.Order,
+                file_model_1.File,
+                status_model_1.Status,
+                type_model_1.Type,
+                vapid_model_1.Vapid,
+                subscription_model_1.Subscription,
+                keys_model_1.Keys,
+            ]),
             platform_express_1.MulterModule.register({
                 dest: "./dist/user/uploads",
             }),

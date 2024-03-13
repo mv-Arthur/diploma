@@ -2,6 +2,8 @@ import { Column, DataType, Table, Model, HasMany, HasOne, ForeignKey } from "seq
 import { Token } from "./token.model";
 import { RoleType } from "../types/RoleType";
 import { Order } from "./order.model";
+import { Vapid } from "./vapid.model";
+import { Subscription } from "./subscription.model";
 
 interface CreationAttrs {
 	email: string;
@@ -35,4 +37,8 @@ export class User extends Model<User, CreationAttrs> {
 	token: Token;
 	@HasMany(() => Order, { onDelete: "CASCADE" })
 	order: Order[];
+	@HasOne(() => Vapid)
+	vapid: Vapid;
+	@HasOne(() => Subscription)
+	subscription: Subscription;
 }

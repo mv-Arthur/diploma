@@ -16,6 +16,7 @@ export declare class OrderService {
     constructor(orderRepository: typeof Order, userRepository: typeof User, fileRepository: typeof File, statusRepository: typeof Status, typeRepository: typeof Type);
     getExtension(filename: string): string | false;
     addOrder(userId: number, file: Express.Multer.File, dto: AddOrderDto): Promise<OrderDto>;
+    getAlluser(): Promise<User[]>;
     setPrice(id: number, price: string): Promise<void>;
     setStatus(id: number, status: StatusType): Promise<void>;
     updateDescription(id: number, description: string): Promise<void>;

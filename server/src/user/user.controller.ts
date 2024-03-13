@@ -29,7 +29,15 @@ import { SetStatusDto } from "./dto/setStatus.dto";
 import { updateDescriptionDto } from "./dto/updateDescription.dto";
 import { CreateTypeDto } from "./dto/createType.dto";
 import * as webPush from "web-push";
-import { Json } from "sequelize/types/utils";
+
+export interface PushSubscription {
+	endpoint: string;
+	expirationTime?: number | null;
+	keys: {
+		p256dh: string;
+		auth: string;
+	};
+}
 @Controller("user")
 export class UserController {
 	constructor(
@@ -51,8 +59,41 @@ export class UserController {
 			if (err.status) {
 				return res.status(err.status).json({ message: err.message, status: err.status });
 			}
+			console.log(err);
 			return res.json({ message: "непредвиденная ошибка", status: HttpStatus.BAD_REQUEST });
 		}
+	}
+
+	@Post("/subscription")
+	async subscription(@Req() req: Request, @Res() res: Response) {
+		const sub: PushSubscription = req.body.subscription;
+		const userId: number = req.body.id;
+		await this.userService.subscribe(sub, userId);
+		return {
+			message: "успешно подписан",
+		};
+	}
+
+	@Post("/resubscribe")
+	async resubscribe(@Req() req: Request, @Res() res: Response) {
+		const sub: PushSubscription = req.body.subscription;
+		const userId: number = req.body.id;
+		await this.userService.resubscribe(sub, userId);
+		return {
+			message: "успешно переподписан",
+		};
+	}
+
+	@Get("/subscription/:id")
+	async unsubscribe(@Param("id") id: number) {
+		const subscription = await this.userService.unsubscribe(id);
+		return subscription;
+	}
+
+	@Get("pushKey/:id")
+	async getPushKey(@Param("id") id: number) {
+		const key = await this.userService.getPushKey(id);
+		return { publicKey: key };
 	}
 
 	@UsePipes(ValidationPipe)
@@ -212,24 +253,8 @@ export class UserController {
 		return await this.orderService.deleteType(id);
 	}
 
-	@Post("/subscription")
-	async subscription(@Req() req: any, @Res() res: Response) {
-		const body = req.body;
-		webPush.setVapidDetails(
-			"mailto:example@yourdomain.org",
-			"BJrq3EQknklUpqlywGeRdEb0K77afRL6OD78Lqt_rE18IZ-7bUOrMzVymeURsnB3oZ8m2GUCfxJqCL72nHLkOXk",
-			"TisUWleTJzlpss0S8r_7799vW1d_A78Y_rRVLa87jz0"
-		);
-
-		console.log(body);
-		await webPush.sendNotification(
-			req.body,
-			JSON.stringify({
-				title: "жопа жопа жопа",
-				descr: "говно хуй залупа",
-			})
-		);
-
-		res.status(200).json("ok");
+	@Get("/test")
+	async testToGetUsersByAdmin() {
+		return this.orderService.getAlluser();
 	}
 }

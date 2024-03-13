@@ -26,7 +26,6 @@ const setPrice_dto_1 = require("./dto/setPrice.dto");
 const setStatus_dto_1 = require("./dto/setStatus.dto");
 const updateDescription_dto_1 = require("./dto/updateDescription.dto");
 const createType_dto_1 = require("./dto/createType.dto");
-const webPush = require("web-push");
 let UserController = class UserController {
     constructor(userService, orderService) {
         this.userService = userService;
@@ -46,8 +45,33 @@ let UserController = class UserController {
             if (err.status) {
                 return res.status(err.status).json({ message: err.message, status: err.status });
             }
+            console.log(err);
             return res.json({ message: "непредвиденная ошибка", status: common_1.HttpStatus.BAD_REQUEST });
         }
+    }
+    async subscription(req, res) {
+        const sub = req.body.subscription;
+        const userId = req.body.id;
+        await this.userService.subscribe(sub, userId);
+        return {
+            message: "успешно подписан",
+        };
+    }
+    async resubscribe(req, res) {
+        const sub = req.body.subscription;
+        const userId = req.body.id;
+        await this.userService.resubscribe(sub, userId);
+        return {
+            message: "успешно переподписан",
+        };
+    }
+    async unsubscribe(id) {
+        const subscription = await this.userService.unsubscribe(id);
+        return subscription;
+    }
+    async getPushKey(id) {
+        const key = await this.userService.getPushKey(id);
+        return { publicKey: key };
     }
     async login(dto, res) {
         try {
@@ -166,15 +190,8 @@ let UserController = class UserController {
     async deleteTypeById(id) {
         return await this.orderService.deleteType(id);
     }
-    async subscription(req, res) {
-        const body = req.body;
-        webPush.setVapidDetails("mailto:example@yourdomain.org", "BJrq3EQknklUpqlywGeRdEb0K77afRL6OD78Lqt_rE18IZ-7bUOrMzVymeURsnB3oZ8m2GUCfxJqCL72nHLkOXk", "TisUWleTJzlpss0S8r_7799vW1d_A78Y_rRVLa87jz0");
-        console.log(body);
-        await webPush.sendNotification(req.body, JSON.stringify({
-            title: "жопа жопа жопа",
-            descr: "говно хуй залупа",
-        }));
-        res.status(200).json("ok");
+    async testToGetUsersByAdmin() {
+        return this.orderService.getAlluser();
     }
 };
 exports.UserController = UserController;
@@ -187,6 +204,36 @@ __decorate([
     __metadata("design:paramtypes", [registration_dto_1.RegistrationDto, Object]),
     __metadata("design:returntype", Promise)
 ], UserController.prototype, "registration", null);
+__decorate([
+    (0, common_1.Post)("/subscription"),
+    __param(0, (0, common_1.Req)()),
+    __param(1, (0, common_1.Res)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, Object]),
+    __metadata("design:returntype", Promise)
+], UserController.prototype, "subscription", null);
+__decorate([
+    (0, common_1.Post)("/resubscribe"),
+    __param(0, (0, common_1.Req)()),
+    __param(1, (0, common_1.Res)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, Object]),
+    __metadata("design:returntype", Promise)
+], UserController.prototype, "resubscribe", null);
+__decorate([
+    (0, common_1.Get)("/subscription/:id"),
+    __param(0, (0, common_1.Param)("id")),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Number]),
+    __metadata("design:returntype", Promise)
+], UserController.prototype, "unsubscribe", null);
+__decorate([
+    (0, common_1.Get)("pushKey/:id"),
+    __param(0, (0, common_1.Param)("id")),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Number]),
+    __metadata("design:returntype", Promise)
+], UserController.prototype, "getPushKey", null);
 __decorate([
     (0, common_1.UsePipes)(validation_pipe_1.ValidationPipe),
     (0, common_1.Post)("/login"),
@@ -307,13 +354,11 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], UserController.prototype, "deleteTypeById", null);
 __decorate([
-    (0, common_1.Post)("/subscription"),
-    __param(0, (0, common_1.Req)()),
-    __param(1, (0, common_1.Res)()),
+    (0, common_1.Get)("/test"),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Object, Object]),
+    __metadata("design:paramtypes", []),
     __metadata("design:returntype", Promise)
-], UserController.prototype, "subscription", null);
+], UserController.prototype, "testToGetUsersByAdmin", null);
 exports.UserController = UserController = __decorate([
     (0, common_1.Controller)("user"),
     __metadata("design:paramtypes", [user_service_1.UserService,

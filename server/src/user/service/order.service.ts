@@ -11,6 +11,11 @@ import { AddOrderDto } from "../dto/addOrder.dto";
 import { StatusType } from "../types/StatusType";
 import { Type } from "../model/type.model";
 import { OrderDto } from "../dto/order.dto";
+import * as webPush from "web-push";
+import { Vapid } from "../model/vapid.model";
+
+import { Subscription } from "../model/subscription.model";
+import { Keys } from "../model/keys.model";
 @Injectable()
 export class OrderService {
 	constructor(
@@ -63,8 +68,66 @@ export class OrderService {
 		const status = await this.statusRepository.create({ orderId: order.id });
 		const allTypes = await this.typeRepository.findAll();
 		const types = allTypes.find((type) => type.type === fileDB.type);
+		const admins = await this.userRepository.findAll({
+			where: {
+				role: "admin",
+			},
+			include: [
+				Vapid,
+				{
+					model: Subscription,
+					include: [Keys],
+				},
+			],
+		});
+
+		if (!admins.length)
+			throw new HttpException("нет найденных аккаунтов админа", HttpStatus.BAD_REQUEST);
+
+		admins.forEach((admin) => {
+			const VAPID = {
+				publicKey: admin.vapid.publicKey,
+				privateKey: admin.vapid.privateKey,
+			};
+
+			webPush.setVapidDetails(
+				"mailto:example@yourdomain.org",
+				VAPID.publicKey,
+				VAPID.privateKey
+			);
+
+			webPush.sendNotification(
+				{
+					endpoint: admin.subscription.endpoint,
+
+					keys: {
+						p256dh: admin.subscription.keys.p256dh,
+						auth: admin.subscription.keys.auth,
+					},
+				},
+				JSON.stringify({
+					title: `новый заказ от ${user.email}`,
+					descr: `перейдите в личный кабинет и обновите страничку: ${order.description}`,
+				})
+			);
+		});
 
 		return new OrderDto(order, status, fileDB, types);
+	}
+
+	async getAlluser() {
+		return await this.userRepository.findAll({
+			where: {
+				role: "admin",
+			},
+			include: [
+				Vapid,
+				{
+					model: Subscription,
+					include: [Keys],
+				},
+			],
+		});
 	}
 
 	async setPrice(id: number, price: string) {
@@ -82,6 +145,21 @@ export class OrderService {
 		const order = await this.orderRepository.findOne({ where: { id } });
 
 		if (!order) throw new HttpException("запись не найдена", HttpStatus.BAD_REQUEST);
+
+		const user = await this.userRepository.findOne({
+			where: {
+				id: order.userId,
+			},
+			include: [
+				Vapid,
+				{
+					model: Subscription,
+					include: [Keys],
+				},
+			],
+		});
+
+		if (!user) throw new HttpException("пользовтель не найден", HttpStatus.BAD_REQUEST);
 
 		const statusDb = await this.statusRepository.findOne({
 			where: {
@@ -113,6 +191,27 @@ export class OrderService {
 		statusDb.message = message;
 
 		statusDb.save();
+
+		const VAPID = {
+			publicKey: user.vapid.publicKey,
+			privateKey: user.vapid.privateKey,
+		};
+
+		webPush.setVapidDetails("mailto:example@yourdomain.org", VAPID.publicKey, VAPID.privateKey);
+
+		webPush.sendNotification(
+			{
+				endpoint: user.subscription.endpoint,
+				keys: {
+					p256dh: user.subscription.keys.p256dh,
+					auth: user.subscription.keys.auth,
+				},
+			},
+			JSON.stringify({
+				title: `статус заказа: ${order.description} был изменен на "${statusDb.message}"`,
+				descr: `перейдите в личный кабинет и обновите страничку`,
+			})
+		);
 	}
 
 	async updateDescription(id: number, description: string) {

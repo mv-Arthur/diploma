@@ -29,28 +29,6 @@ if ("serviceWorker" in navigator) {
 			}
 		);
 	});
-
-	navigator.serviceWorker.ready
-		.then(async function (registration) {
-			const pushServerPublicKey =
-				"BJrq3EQknklUpqlywGeRdEb0K77afRL6OD78Lqt_rE18IZ-7bUOrMzVymeURsnB3oZ8m2GUCfxJqCL72nHLkOXk";
-			// subscribe and return the subscription
-			const subscription = await registration.pushManager.subscribe({
-				userVisibleOnly: true,
-				applicationServerKey: pushServerPublicKey,
-			});
-
-			fetch("http://localhost:5000/user/subscription", {
-				method: "POST",
-				body: JSON.stringify(subscription),
-				headers: {
-					"Content-Type": "application/json",
-				},
-			});
-		})
-		.catch((err) => {
-			console.log(err);
-		});
 }
 
 const root = ReactDOM.createRoot(document.getElementById("root") as HTMLElement);

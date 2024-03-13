@@ -8,11 +8,29 @@ import { SetPriceDto } from "./dto/setPrice.dto";
 import { SetStatusDto } from "./dto/setStatus.dto";
 import { updateDescriptionDto } from "./dto/updateDescription.dto";
 import { CreateTypeDto } from "./dto/createType.dto";
+export interface PushSubscription {
+    endpoint: string;
+    expirationTime?: number | null;
+    keys: {
+        p256dh: string;
+        auth: string;
+    };
+}
 export declare class UserController {
     private userService;
     private orderService;
     constructor(userService: UserService, orderService: OrderService);
     registration(dto: RegistrationDto, res: Response): Promise<Response<any, Record<string, any>>>;
+    subscription(req: Request, res: Response): Promise<{
+        message: string;
+    }>;
+    resubscribe(req: Request, res: Response): Promise<{
+        message: string;
+    }>;
+    unsubscribe(id: number): Promise<import("./model/subscription.model").Subscription>;
+    getPushKey(id: number): Promise<{
+        publicKey: string;
+    }>;
     login(dto: RegistrationDto, res: Response): Promise<Response<any, Record<string, any>>>;
     logout(req: Request, res: Response): Promise<Response<any, Record<string, any>>>;
     activate(activationLink: string, res: Response): Promise<void | Response<any, Record<string, any>>>;
@@ -45,5 +63,5 @@ export declare class UserController {
     deleteTypeById(id: number): Promise<{
         deletedTypeId: any;
     }>;
-    subscription(req: any, res: Response): Promise<void>;
+    testToGetUsersByAdmin(): Promise<import("./model/user.model").User[]>;
 }

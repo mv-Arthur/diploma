@@ -6,12 +6,20 @@ import * as bcrypt from "bcrypt";
 import { v4 as uuidv4 } from "uuid";
 import { MailService } from "./mail.service";
 import { TokenService } from "./token.service";
+import { Vapid } from "../model/vapid.model";
+import * as webPush from "web-push";
+import { PushSubscription } from "../user.controller";
+import { Keys } from "../model/keys.model";
+import { Subscription } from "../model/subscription.model";
 @Injectable()
 export class UserService {
 	constructor(
 		@InjectModel(User) private userRepository: typeof User,
 		private mailService: MailService,
-		private tokenService: TokenService
+		private tokenService: TokenService,
+		@InjectModel(Vapid) private vapidRepository: typeof Vapid,
+		@InjectModel(Keys) private keysRepository: typeof Keys,
+		@InjectModel(Subscription) private subsciptionRepository: typeof Subscription
 	) {}
 	async registration(email: string, password: string) {
 		const candidate = await this.userRepository.findOne({ where: { email: email } });
@@ -45,10 +53,77 @@ export class UserService {
 		const tokens = this.tokenService.generateToken({ ...userDto });
 		await this.tokenService.saveToken(userDto.id, tokens.refreshToken);
 
+		const twins = webPush.generateVAPIDKeys();
+		await this.vapidRepository.create({
+			userId: userDto.id,
+			publicKey: twins.publicKey,
+			privateKey: twins.privateKey,
+		});
+
 		return {
 			...tokens,
 			user: userDto,
 		};
+	}
+
+	async subscribe(sub: PushSubscription, id: number) {
+		const subscription = await this.subsciptionRepository.create({
+			endpoint: sub.endpoint,
+			expirationTime: sub.expirationTime,
+			userId: id,
+		});
+		const keys = await this.keysRepository.create({
+			p256dh: sub.keys.p256dh,
+			auth: sub.keys.auth,
+			subscriptionId: subscription.id,
+		});
+	}
+
+	async resubscribe(sub: PushSubscription, id: number) {
+		const subscription = await this.subsciptionRepository.findOne({
+			where: {
+				userId: id,
+			},
+		});
+
+		const keys = await this.keysRepository.findOne({
+			where: {
+				subscriptionId: subscription.id,
+			},
+		});
+
+		subscription.endpoint = sub.endpoint;
+		subscription.expirationTime = sub.expirationTime;
+		await subscription.save();
+
+		keys.p256dh = sub.keys.p256dh;
+		keys.auth = sub.keys.auth;
+
+		await keys.save();
+	}
+
+	async unsubscribe(id: number) {
+		const subscription = await this.subsciptionRepository.findOne({
+			where: {
+				userId: id,
+			},
+			include: {
+				all: true,
+			},
+		});
+		if (!subscription) {
+			throw new HttpException("подписка не найдена", HttpStatus.BAD_REQUEST);
+		}
+
+		return subscription;
+	}
+
+	async getPushKey(id: number) {
+		const keys = await this.vapidRepository.findOne({
+			where: { userId: id },
+		});
+		if (!keys) throw new HttpException("ключи не найдены", HttpStatus.BAD_REQUEST);
+		return keys.publicKey;
 	}
 
 	async activate(activationLink: string) {
