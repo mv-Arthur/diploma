@@ -12,6 +12,11 @@ import TextField from "@mui/material/TextField";
 import { CreateOrderForm } from "../components/CreateOrderForm";
 import { OrderArea } from "../components/OrderArea";
 import { orderStore } from "../store/orderStore";
+import AppBar from "@mui/material/AppBar";
+import Toolbar from "@mui/material/Toolbar";
+import IconButton from "@mui/material/IconButton";
+import MenuIcon from "@mui/icons-material/Menu";
+import Container from "@mui/material/Container";
 const UserPage: React.FC = () => {
 	const navigate = useNavigate();
 	const { store } = useContext(Context);
@@ -30,26 +35,11 @@ const UserPage: React.FC = () => {
 				"загрузка"
 			) : (
 				<>
-					<Typography>Приветствую, вы авторизованы как {store.user.email}</Typography>
-					<Typography>Вы пользователь</Typography>
-					<Typography>
-						{store.user.isActivated
-							? "подтвержденный аккаунт"
-							: "пожалуйста, перейдите на почту и подтвердите аккаунт"}
-					</Typography>
-					<Button
-						variant="contained"
-						onClick={async () => {
-							await store.logout();
-							navigate("/");
-						}}
-					>
-						выход
-					</Button>
+					<Container>
+						<CreateOrderForm />
 
-					<CreateOrderForm />
-
-					<OrderArea />
+						<OrderArea />
+					</Container>
 				</>
 			)}
 		</div>

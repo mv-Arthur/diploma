@@ -4,13 +4,26 @@ import { orderStore } from "../store/orderStore";
 import Button from "@mui/material/Button";
 import $api, { API_URL } from "../http";
 import { OrderComponent } from "./Order";
+
+const orderAreaStyles = {
+	display: "flex",
+};
+
 export const OrderArea = observer(() => {
 	const handleDownload = (id: number) => {
 		window.location.href = `${API_URL}/user/download/${id}`;
 	};
 
 	return (
-		<div>
+		<div
+			style={{
+				display: "flex",
+				gap: 10,
+				flexWrap: "wrap",
+				marginTop: 20,
+				width: 878,
+			}}
+		>
 			{orderStore.orders.length ? (
 				orderStore.orders.map((order) => {
 					return (

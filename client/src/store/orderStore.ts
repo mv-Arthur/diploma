@@ -14,7 +14,7 @@ class OrderStore {
 	}
 
 	addFetchedOrders(orders: Order[]) {
-		this.orders = [...this.orders, ...orders];
+		this.orders = [...orders];
 	}
 
 	async fetchOrders(userId: number) {

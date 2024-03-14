@@ -5,15 +5,27 @@ import { Context } from "..";
 import { CreateTypeForm } from "../components/CreateTypeForm";
 import Typography from "@mui/material/Typography";
 import Button from "@mui/material/Button";
-import Paper from "@mui/material/Paper";
-import { typeStore } from "../store/typeStore";
+
 import { TypesArea } from "../components/TypesArea";
 import { orderStore } from "../store/orderStore";
 import { OrderAdmin } from "../components/OrderAdmin";
-import axios from "axios";
-import { API_URL } from "../http";
+
+import AppBar from "@mui/material/AppBar";
+import Toolbar from "@mui/material/Toolbar";
+
+import IconButton from "@mui/material/IconButton";
+import MenuIcon from "@mui/icons-material/Menu";
+import Box from "@mui/material/Box";
+import List from "@mui/material/List";
+import ListItem from "@mui/material/ListItem";
+import ListItemButton from "@mui/material/ListItemButton";
+import ListItemIcon from "@mui/material/ListItemIcon";
+import ListItemText from "@mui/material/ListItemText";
+
+import Drawer from "@mui/material/Drawer";
+import SupervisedUserCircleIcon from "@mui/icons-material/SupervisedUserCircle";
+import TypeSpecimenIcon from "@mui/icons-material/TypeSpecimen";
 const AdminPage = () => {
-	const navigate = useNavigate();
 	const { store } = useContext(Context);
 
 	React.useEffect(() => {
@@ -27,30 +39,6 @@ const AdminPage = () => {
 
 	return (
 		<div>
-			<Typography variant="h6" gutterBottom>
-				Приветствую, вы авторизованы как {store.user.email}
-			</Typography>
-			<Typography variant="h6" gutterBottom>
-				Вы администратор
-			</Typography>
-
-			<Typography variant="h6" gutterBottom>
-				{store.user.isActivated
-					? "подтвержденный аккаунт"
-					: "пожалуйста, перейдите на почту и подтвердите аккаунт"}
-			</Typography>
-			<Button
-				variant="contained"
-				onClick={async () => {
-					await store.logout();
-					navigate("/");
-				}}
-			>
-				выход
-			</Button>
-			<CreateTypeForm />
-
-			<TypesArea />
 			<OrderAdmin />
 		</div>
 	);

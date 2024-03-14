@@ -3,6 +3,7 @@ import Select, { SelectChangeEvent } from "@mui/material/Select";
 import MenuItem from "@mui/material/MenuItem";
 import { observer } from "mobx-react-lite";
 import { typeStore } from "../store/typeStore";
+import { formItemStyle } from "./CreateOrderForm";
 export const SetTypeSelect = observer(() => {
 	const [type, setType] = React.useState("unqnown");
 
@@ -17,6 +18,7 @@ export const SetTypeSelect = observer(() => {
 			id="demo-simple-select"
 			value={type}
 			onChange={handleChange}
+			style={formItemStyle}
 		>
 			<MenuItem key={123723981} value={"unqnown"}>
 				выберете тип

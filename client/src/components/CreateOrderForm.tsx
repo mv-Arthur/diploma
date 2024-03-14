@@ -8,10 +8,23 @@ import $api from "../http";
 import { Context } from "..";
 import { OrderService } from "../services/OrderService";
 import { orderStore } from "../store/orderStore";
+
+export const formItemStyle = {
+	width: "210px",
+	height: "56px",
+};
+
+const wrapperFormStyle = {
+	display: "flex",
+	gap: "10px",
+	marginTop: 20,
+};
+
 export const CreateOrderForm = observer(() => {
 	const [file, setFile] = React.useState<any>(null);
 	const [description, setDescription] = React.useState("");
 	const { store } = useContext(Context);
+	const inputRef = React.useRef<null | HTMLInputElement>(null);
 	const onSubmit = async () => {
 		console.log(file, description, typeStore.current.type);
 		const formData = new FormData();
@@ -24,16 +37,29 @@ export const CreateOrderForm = observer(() => {
 	};
 
 	return (
-		<div>
+		<div style={wrapperFormStyle}>
 			<input
+				ref={inputRef}
 				type="file"
 				placeholder="загрузите файл"
+				style={{ display: "none" }}
 				onChange={(e) => {
 					if (e.currentTarget.files) setFile(e.currentTarget.files[0]);
 				}}
 			/>
-
+			<Button
+				variant="outlined"
+				style={formItemStyle}
+				onClick={() => {
+					if (inputRef) {
+						inputRef.current?.click();
+					}
+				}}
+			>
+				Выберете файл
+			</Button>
 			<TextField
+				style={formItemStyle}
 				id="outlined-basic"
 				label="введите описание"
 				variant="outlined"
@@ -42,7 +68,7 @@ export const CreateOrderForm = observer(() => {
 				}}
 			/>
 			<SetTypeSelect />
-			<Button variant="outlined" onClick={onSubmit}>
+			<Button style={formItemStyle} variant="outlined" onClick={onSubmit}>
 				заказать
 			</Button>
 		</div>

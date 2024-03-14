@@ -5,6 +5,7 @@ import TextField from "@mui/material/TextField";
 import Select, { SelectChangeEvent } from "@mui/material/Select";
 import MenuItem from "@mui/material/MenuItem";
 import FormControl from "@mui/material/FormControl";
+import Paper from "@mui/material/Paper";
 type PropsType = {
 	order: Order;
 	handleDownload: (id: number) => void;
@@ -27,7 +28,7 @@ export const OrderComponent: React.FC<PropsType> = (props) => {
 	};
 
 	return (
-		<div>
+		<Paper style={{ width: "210px" }}>
 			<div>описание: {props.order.description}</div>
 			<div>
 				цена:{" "}
@@ -69,6 +70,6 @@ export const OrderComponent: React.FC<PropsType> = (props) => {
 				файл <Button onClick={() => props.handleDownload(props.order.id)}>Скачать</Button>
 			</div>
 			<div>{props.editble && <Button onClick={clickHandler}>Сохранить</Button>}</div>
-		</div>
+		</Paper>
 	);
 };
