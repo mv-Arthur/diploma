@@ -8,7 +8,7 @@ import Button from "@mui/material/Button";
 
 import { TypesArea } from "../components/TypesArea";
 import { orderStore } from "../store/orderStore";
-import { OrderAdmin } from "../components/OrderAdmin";
+import { OrderAdmin } from "../components/orderAdmin/OrderAdmin";
 
 import AppBar from "@mui/material/AppBar";
 import Toolbar from "@mui/material/Toolbar";

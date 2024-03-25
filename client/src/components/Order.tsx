@@ -28,7 +28,7 @@ export const OrderComponent: React.FC<PropsType> = (props) => {
 	};
 
 	return (
-		<Paper style={{ width: "210px" }}>
+		<Paper style={{ width: "210px", height: "260px" }}>
 			<div>описание: {props.order.description}</div>
 			<div>
 				цена:{" "}

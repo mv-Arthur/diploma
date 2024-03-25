@@ -172,9 +172,8 @@ let UserController = class UserController {
             message: "Успех",
         };
     }
-    async createType(dto) {
-        const { name, type } = dto;
-        const newType = await this.orderService.createType(name, type);
+    async createType(dto, file) {
+        const newType = await this.orderService.createType(dto, file);
         return {
             message: "Успех",
             data: newType,
@@ -323,11 +322,12 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], UserController.prototype, "updateDescription", null);
 __decorate([
-    (0, common_1.UseGuards)(role_guard_1.RoleGuard),
     (0, common_1.Post)("/createType"),
+    (0, common_1.UseInterceptors)((0, platform_express_1.FileInterceptor)("file")),
     __param(0, (0, common_1.Body)()),
+    __param(1, (0, common_1.UploadedFile)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [createType_dto_1.CreateTypeDto]),
+    __metadata("design:paramtypes", [createType_dto_1.CreateTypeDto, Object]),
     __metadata("design:returntype", Promise)
 ], UserController.prototype, "createType", null);
 __decorate([

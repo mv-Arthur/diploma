@@ -17,7 +17,7 @@ export class Subscription extends Model<Subscription, CreationAttrs> {
 		primaryKey: true,
 	})
 	id: number;
-	@Column({ type: DataType.STRING, allowNull: false })
+	@Column({ type: DataType.TEXT, allowNull: false })
 	endpoint: string;
 	@Column({ type: DataType.STRING, allowNull: true })
 	expirationTime: number | null;

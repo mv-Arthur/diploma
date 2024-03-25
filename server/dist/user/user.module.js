@@ -28,13 +28,22 @@ const type_model_1 = require("./model/type.model");
 const vapid_model_1 = require("./model/vapid.model");
 const subscription_model_1 = require("./model/subscription.model");
 const keys_model_1 = require("./model/keys.model");
+const platform_express_2 = require("@nestjs/platform-express");
 let UserModule = class UserModule {
 };
 exports.UserModule = UserModule;
 exports.UserModule = UserModule = __decorate([
     (0, common_1.Module)({
         controllers: [user_controller_1.UserController],
-        providers: [user_service_1.UserService, mail_service_1.MailService, token_service_1.TokenService, jwt_auth_guard_1.JwtAuthGuard, order_service_1.OrderService, role_guard_1.RoleGuard],
+        providers: [
+            platform_express_2.ExpressAdapter,
+            user_service_1.UserService,
+            mail_service_1.MailService,
+            token_service_1.TokenService,
+            jwt_auth_guard_1.JwtAuthGuard,
+            order_service_1.OrderService,
+            role_guard_1.RoleGuard,
+        ],
         imports: [
             jwt_1.JwtModule.register({}),
             config_1.ConfigModule,

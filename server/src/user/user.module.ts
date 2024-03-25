@@ -19,10 +19,20 @@ import { Type } from "./model/type.model";
 import { Vapid } from "./model/vapid.model";
 import { Subscription } from "./model/subscription.model";
 import { Keys } from "./model/keys.model";
-
+import * as express from "express";
+import { join } from "path";
+import { ExpressAdapter } from "@nestjs/platform-express";
 @Module({
 	controllers: [UserController],
-	providers: [UserService, MailService, TokenService, JwtAuthGuard, OrderService, RoleGuard],
+	providers: [
+		ExpressAdapter,
+		UserService,
+		MailService,
+		TokenService,
+		JwtAuthGuard,
+		OrderService,
+		RoleGuard,
+	],
 	imports: [
 		JwtModule.register({}),
 		ConfigModule,

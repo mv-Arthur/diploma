@@ -13,6 +13,7 @@ const app_service_1 = require("./app.service");
 const sequelize_1 = require("@nestjs/sequelize");
 const config_1 = require("@nestjs/config");
 const user_module_1 = require("./user/user.module");
+const platform_express_1 = require("@nestjs/platform-express");
 let AppModule = class AppModule {
 };
 exports.AppModule = AppModule;
@@ -35,7 +36,7 @@ exports.AppModule = AppModule = __decorate([
             user_module_1.UserModule,
         ],
         controllers: [app_controller_1.AppController],
-        providers: [app_service_1.AppService],
+        providers: [app_service_1.AppService, platform_express_1.ExpressAdapter],
     })
 ], AppModule);
 //# sourceMappingURL=app.module.js.map

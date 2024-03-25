@@ -1,0 +1,21 @@
+.area {
+	margin-top: 10px;
+	grid-template-columns: 1fr 6fr;
+	display: grid;
+	grid-template-areas: "left right";
+}
+
+.left {
+	grid-area: left;
+}
+
+.right {
+	grid-area: right;
+	display: flex;
+
+	flex-wrap: wrap;
+	gap: 10px;
+
+	height: 550px;
+	overflow-y: scroll;
+}

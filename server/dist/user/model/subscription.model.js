@@ -26,7 +26,7 @@ __decorate([
     __metadata("design:type", Number)
 ], Subscription.prototype, "id", void 0);
 __decorate([
-    (0, sequelize_typescript_1.Column)({ type: sequelize_typescript_1.DataType.STRING, allowNull: false }),
+    (0, sequelize_typescript_1.Column)({ type: sequelize_typescript_1.DataType.TEXT, allowNull: false }),
     __metadata("design:type", String)
 ], Subscription.prototype, "endpoint", void 0);
 __decorate([

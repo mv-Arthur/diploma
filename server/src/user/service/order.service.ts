@@ -16,6 +16,7 @@ import { Vapid } from "../model/vapid.model";
 
 import { Subscription } from "../model/subscription.model";
 import { Keys } from "../model/keys.model";
+import { CreateTypeDto } from "../dto/createType.dto";
 @Injectable()
 export class OrderService {
 	constructor(
@@ -84,33 +85,35 @@ export class OrderService {
 		if (!admins.length)
 			throw new HttpException("нет найденных аккаунтов админа", HttpStatus.BAD_REQUEST);
 
-		admins.forEach((admin) => {
-			const VAPID = {
-				publicKey: admin.vapid.publicKey,
-				privateKey: admin.vapid.privateKey,
-			};
+		try {
+			for (const admin of admins) {
+				const VAPID = {
+					publicKey: admin.vapid.publicKey,
+					privateKey: admin.vapid.privateKey,
+				};
 
-			webPush.setVapidDetails(
-				"mailto:example@yourdomain.org",
-				VAPID.publicKey,
-				VAPID.privateKey
-			);
+				webPush.setVapidDetails(
+					"mailto:example@yourdomain.org",
+					VAPID.publicKey,
+					VAPID.privateKey
+				);
 
-			webPush.sendNotification(
-				{
-					endpoint: admin.subscription.endpoint,
+				await webPush.sendNotification(
+					{
+						endpoint: admin.subscription.endpoint,
 
-					keys: {
-						p256dh: admin.subscription.keys.p256dh,
-						auth: admin.subscription.keys.auth,
+						keys: {
+							p256dh: admin.subscription.keys.p256dh,
+							auth: admin.subscription.keys.auth,
+						},
 					},
-				},
-				JSON.stringify({
-					title: `новый заказ от ${user.email}`,
-					descr: `перейдите в личный кабинет и обновите страничку: ${order.description}`,
-				})
-			);
-		});
+					JSON.stringify({
+						title: `новый заказ от ${user.email}`,
+						descr: `перейдите в личный кабинет и обновите страничку: ${order.description}`,
+					})
+				);
+			}
+		} catch (err) {}
 
 		return new OrderDto(order, status, fileDB, types);
 	}
@@ -197,21 +200,27 @@ export class OrderService {
 			privateKey: user.vapid.privateKey,
 		};
 
-		webPush.setVapidDetails("mailto:example@yourdomain.org", VAPID.publicKey, VAPID.privateKey);
+		try {
+			webPush.setVapidDetails(
+				"mailto:example@yourdomain.org",
+				VAPID.publicKey,
+				VAPID.privateKey
+			);
 
-		webPush.sendNotification(
-			{
-				endpoint: user.subscription.endpoint,
-				keys: {
-					p256dh: user.subscription.keys.p256dh,
-					auth: user.subscription.keys.auth,
+			await webPush.sendNotification(
+				{
+					endpoint: user.subscription.endpoint,
+					keys: {
+						p256dh: user.subscription.keys.p256dh,
+						auth: user.subscription.keys.auth,
+					},
 				},
-			},
-			JSON.stringify({
-				title: `статус заказа: ${order.description} был изменен на "${statusDb.message}"`,
-				descr: `перейдите в личный кабинет и обновите страничку`,
-			})
-		);
+				JSON.stringify({
+					title: `статус заказа: ${order.description} был изменен на "${statusDb.message}"`,
+					descr: `перейдите в личный кабинет и обновите страничку`,
+				})
+			);
+		} catch (err) {}
 	}
 
 	async updateDescription(id: number, description: string) {
@@ -221,16 +230,34 @@ export class OrderService {
 		order.save();
 	}
 
-	async createType(name: string, type: string) {
+	async createType(dto: CreateTypeDto, file: Express.Multer.File) {
+		// console.log(name, type);
+		const { type, name } = dto;
 		const typeDb = await this.typeRepository.findOne({ where: { type } });
 
 		if (typeDb) {
 			throw new HttpException("такой тип уже имеется", HttpStatus.BAD_REQUEST);
 		}
 
+		const extention = this.getExtension(file.originalname);
+
+		const fileName = uuidv4() + `.${extention}`;
+
+		const filePath = join(__dirname, "..", "uploads", fileName);
+		if (extention) {
+			rename(file.path, filePath, (err) => {
+				if (err) {
+					console.error(err);
+					throw new HttpException("ошибка при чтении файла", HttpStatus.BAD_REQUEST);
+				}
+				console.log(`переименован успешно`);
+			});
+		}
+
 		const newType = await this.typeRepository.create({
 			name,
 			type,
+			fileName,
 		});
 
 		return newType;

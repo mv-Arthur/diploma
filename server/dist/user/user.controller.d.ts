@@ -54,7 +54,7 @@ export declare class UserController {
     updateDescription(dto: updateDescriptionDto): Promise<{
         message: string;
     }>;
-    createType(dto: CreateTypeDto): Promise<{
+    createType(dto: CreateTypeDto, file: Express.Multer.File): Promise<{
         message: string;
         data: import("./model/type.model").Type;
     }>;

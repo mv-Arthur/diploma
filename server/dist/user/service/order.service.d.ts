@@ -7,6 +7,7 @@ import { AddOrderDto } from "../dto/addOrder.dto";
 import { StatusType } from "../types/StatusType";
 import { Type } from "../model/type.model";
 import { OrderDto } from "../dto/order.dto";
+import { CreateTypeDto } from "../dto/createType.dto";
 export declare class OrderService {
     private orderRepository;
     private userRepository;
@@ -20,7 +21,7 @@ export declare class OrderService {
     setPrice(id: number, price: string): Promise<void>;
     setStatus(id: number, status: StatusType): Promise<void>;
     updateDescription(id: number, description: string): Promise<void>;
-    createType(name: string, type: string): Promise<Type>;
+    createType(dto: CreateTypeDto, file: Express.Multer.File): Promise<Type>;
     download(id: number): Promise<string>;
     getAllType(): Promise<Type[]>;
     deleteType(id: number): Promise<{

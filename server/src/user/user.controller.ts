@@ -28,7 +28,6 @@ import { SetPriceDto } from "./dto/setPrice.dto";
 import { SetStatusDto } from "./dto/setStatus.dto";
 import { updateDescriptionDto } from "./dto/updateDescription.dto";
 import { CreateTypeDto } from "./dto/createType.dto";
-import * as webPush from "web-push";
 
 export interface PushSubscription {
 	endpoint: string;
@@ -223,11 +222,11 @@ export class UserController {
 		};
 	}
 
-	@UseGuards(RoleGuard)
+	// @UseGuards(RoleGuard)
 	@Post("/createType")
-	async createType(@Body() dto: CreateTypeDto) {
-		const { name, type } = dto;
-		const newType = await this.orderService.createType(name, type);
+	@UseInterceptors(FileInterceptor("file"))
+	async createType(@Body() dto: CreateTypeDto, @UploadedFile() file: Express.Multer.File) {
+		const newType = await this.orderService.createType(dto, file);
 		return {
 			message: "Успех",
 			data: newType,

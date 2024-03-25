@@ -87,23 +87,26 @@ let OrderService = class OrderService {
         });
         if (!admins.length)
             throw new common_1.HttpException("нет найденных аккаунтов админа", common_1.HttpStatus.BAD_REQUEST);
-        admins.forEach((admin) => {
-            const VAPID = {
-                publicKey: admin.vapid.publicKey,
-                privateKey: admin.vapid.privateKey,
-            };
-            webPush.setVapidDetails("mailto:example@yourdomain.org", VAPID.publicKey, VAPID.privateKey);
-            webPush.sendNotification({
-                endpoint: admin.subscription.endpoint,
-                keys: {
-                    p256dh: admin.subscription.keys.p256dh,
-                    auth: admin.subscription.keys.auth,
-                },
-            }, JSON.stringify({
-                title: `новый заказ от ${user.email}`,
-                descr: `перейдите в личный кабинет и обновите страничку: ${order.description}`,
-            }));
-        });
+        try {
+            for (const admin of admins) {
+                const VAPID = {
+                    publicKey: admin.vapid.publicKey,
+                    privateKey: admin.vapid.privateKey,
+                };
+                webPush.setVapidDetails("mailto:example@yourdomain.org", VAPID.publicKey, VAPID.privateKey);
+                await webPush.sendNotification({
+                    endpoint: admin.subscription.endpoint,
+                    keys: {
+                        p256dh: admin.subscription.keys.p256dh,
+                        auth: admin.subscription.keys.auth,
+                    },
+                }, JSON.stringify({
+                    title: `новый заказ от ${user.email}`,
+                    descr: `перейдите в личный кабинет и обновите страничку: ${order.description}`,
+                }));
+            }
+        }
+        catch (err) { }
         return new order_dto_1.OrderDto(order, status, fileDB, types);
     }
     async getAlluser() {
@@ -174,17 +177,20 @@ let OrderService = class OrderService {
             publicKey: user.vapid.publicKey,
             privateKey: user.vapid.privateKey,
         };
-        webPush.setVapidDetails("mailto:example@yourdomain.org", VAPID.publicKey, VAPID.privateKey);
-        webPush.sendNotification({
-            endpoint: user.subscription.endpoint,
-            keys: {
-                p256dh: user.subscription.keys.p256dh,
-                auth: user.subscription.keys.auth,
-            },
-        }, JSON.stringify({
-            title: `статус заказа: ${order.description} был изменен на "${statusDb.message}"`,
-            descr: `перейдите в личный кабинет и обновите страничку`,
-        }));
+        try {
+            webPush.setVapidDetails("mailto:example@yourdomain.org", VAPID.publicKey, VAPID.privateKey);
+            await webPush.sendNotification({
+                endpoint: user.subscription.endpoint,
+                keys: {
+                    p256dh: user.subscription.keys.p256dh,
+                    auth: user.subscription.keys.auth,
+                },
+            }, JSON.stringify({
+                title: `статус заказа: ${order.description} был изменен на "${statusDb.message}"`,
+                descr: `перейдите в личный кабинет и обновите страничку`,
+            }));
+        }
+        catch (err) { }
     }
     async updateDescription(id, description) {
         const order = await this.orderRepository.findOne({ where: { id } });
@@ -193,14 +199,28 @@ let OrderService = class OrderService {
         order.description = description;
         order.save();
     }
-    async createType(name, type) {
+    async createType(dto, file) {
+        const { type, name } = dto;
         const typeDb = await this.typeRepository.findOne({ where: { type } });
         if (typeDb) {
             throw new common_1.HttpException("такой тип уже имеется", common_1.HttpStatus.BAD_REQUEST);
         }
+        const extention = this.getExtension(file.originalname);
+        const fileName = (0, uuid_1.v4)() + `.${extention}`;
+        const filePath = (0, path_1.join)(__dirname, "..", "uploads", fileName);
+        if (extention) {
+            (0, fs_1.rename)(file.path, filePath, (err) => {
+                if (err) {
+                    console.error(err);
+                    throw new common_1.HttpException("ошибка при чтении файла", common_1.HttpStatus.BAD_REQUEST);
+                }
+                console.log(`переименован успешно`);
+            });
+        }
         const newType = await this.typeRepository.create({
             name,
             type,
+            fileName,
         });
         return newType;
     }

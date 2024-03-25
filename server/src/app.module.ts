@@ -5,6 +5,7 @@ import { SequelizeModule } from "@nestjs/sequelize";
 import { ConfigModule } from "@nestjs/config";
 import { UserModule } from "./user/user.module";
 
+import { ExpressAdapter } from "@nestjs/platform-express";
 @Module({
 	imports: [
 		ConfigModule.forRoot({
@@ -23,6 +24,6 @@ import { UserModule } from "./user/user.module";
 		UserModule,
 	],
 	controllers: [AppController],
-	providers: [AppService],
+	providers: [AppService, ExpressAdapter],
 })
 export class AppModule {}

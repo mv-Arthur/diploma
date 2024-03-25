@@ -3,13 +3,9 @@ import { observer } from "mobx-react-lite";
 import React, { useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import { Context } from "..";
-import { CreateTypeForm } from "../components/CreateTypeForm";
+
 import Typography from "@mui/material/Typography";
 import Button from "@mui/material/Button";
-
-import { TypesArea } from "../components/TypesArea";
-import { orderStore } from "../store/orderStore";
-import { OrderAdmin } from "../components/OrderAdmin";
 
 import AppBar from "@mui/material/AppBar";
 import Toolbar from "@mui/material/Toolbar";
