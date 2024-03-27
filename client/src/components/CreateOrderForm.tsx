@@ -4,10 +4,11 @@ import TextField from "@mui/material/TextField";
 import { SetTypeSelect } from "./SetTypeSelect";
 import Button from "@mui/material/Button";
 import { typeStore } from "../store/typeStore";
-import $api from "../http";
+
 import { Context } from "..";
-import { OrderService } from "../services/OrderService";
+
 import { orderStore } from "../store/orderStore";
+import { Typography } from "@mui/material";
 
 export const formItemStyle = {
 	width: "210px",
@@ -47,17 +48,29 @@ export const CreateOrderForm = observer(() => {
 					if (e.currentTarget.files) setFile(e.currentTarget.files[0]);
 				}}
 			/>
-			<Button
-				variant="outlined"
-				style={formItemStyle}
-				onClick={() => {
-					if (inputRef) {
-						inputRef.current?.click();
-					}
-				}}
-			>
-				Выберете файл
-			</Button>
+			<div>
+				<Button
+					variant="outlined"
+					style={formItemStyle}
+					onClick={() => {
+						if (inputRef) {
+							inputRef.current?.click();
+						}
+					}}
+				>
+					Выберете файл
+				</Button>
+				<Typography
+					style={{
+						textOverflow: "ellipsis",
+						width: "210px",
+						overflow: "hidden",
+						whiteSpace: "nowrap",
+					}}
+				>
+					{file && file.name ? file.name : null}
+				</Typography>
+			</div>
 			<TextField
 				style={formItemStyle}
 				id="outlined-basic"

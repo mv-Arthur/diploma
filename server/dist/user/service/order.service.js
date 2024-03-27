@@ -28,6 +28,8 @@ const webPush = require("web-push");
 const vapid_model_1 = require("../model/vapid.model");
 const subscription_model_1 = require("../model/subscription.model");
 const keys_model_1 = require("../model/keys.model");
+const personal_model_1 = require("../model/personal.model");
+const personalCreation_dto_1 = require("../dto/personalCreation.dto");
 let OrderService = class OrderService {
     constructor(orderRepository, userRepository, fileRepository, statusRepository, typeRepository) {
         this.orderRepository = orderRepository;
@@ -73,6 +75,8 @@ let OrderService = class OrderService {
         const status = await this.statusRepository.create({ orderId: order.id });
         const allTypes = await this.typeRepository.findAll();
         const types = allTypes.find((type) => type.type === fileDB.type);
+        order.price = types.minPrice;
+        await order.save();
         const admins = await this.userRepository.findAll({
             where: {
                 role: "admin",
@@ -167,6 +171,9 @@ let OrderService = class OrderService {
         if (status === "resolved") {
             message = "готово к выдаче";
         }
+        if (status === "rejected") {
+            message = "отклонено";
+        }
         if (!message) {
             message = "ожидает принятия";
         }
@@ -200,7 +207,7 @@ let OrderService = class OrderService {
         order.save();
     }
     async createType(dto, file) {
-        const { type, name } = dto;
+        const { type, name, description, minPrice } = dto;
         const typeDb = await this.typeRepository.findOne({ where: { type } });
         if (typeDb) {
             throw new common_1.HttpException("такой тип уже имеется", common_1.HttpStatus.BAD_REQUEST);
@@ -221,6 +228,8 @@ let OrderService = class OrderService {
             name,
             type,
             fileName,
+            description,
+            minPrice,
         });
         return newType;
     }
@@ -266,17 +275,24 @@ let OrderService = class OrderService {
             const status = order.status;
             const file = order.file;
             const type = types.find((type) => type.type === file.type);
-            if (type)
-                return new order_dto_1.OrderDto(order, status, file, type);
+            if (type) {
+                const orderDto = new order_dto_1.OrderDto(order, status, file, type);
+                return {
+                    ...orderDto,
+                };
+            }
             return null;
         });
     }
     async getAllOrder() {
         const users = await this.userRepository.findAll({
-            include: {
-                model: order_model_1.Order,
-                include: [status_model_1.Status, file_model_1.File],
-            },
+            include: [
+                personal_model_1.Personal,
+                {
+                    model: order_model_1.Order,
+                    include: [status_model_1.Status, file_model_1.File],
+                },
+            ],
         });
         const types = await this.typeRepository.findAll();
         return users.map((user) => {
@@ -284,6 +300,8 @@ let OrderService = class OrderService {
             return {
                 id: user.id,
                 email: user.email,
+                role: user.role,
+                personal: new personalCreation_dto_1.PersonalDto(user.personal),
                 order: order.map((order) => {
                     const { status, file } = order;
                     const foundedType = types.find((type) => type.type === file.type);
@@ -298,7 +316,10 @@ let OrderService = class OrderService {
                             type: null,
                             name: null,
                         };
-                    return new order_dto_1.OrderDto(order, status, file, foundedType);
+                    const orderDto = new order_dto_1.OrderDto(order, status, file, foundedType);
+                    return {
+                        ...orderDto,
+                    };
                 }),
             };
         });

@@ -12,7 +12,7 @@ export class OrderDto {
 	file: string;
 	type: string;
 	name: string;
-
+	imgName: string;
 	constructor(order: Order, status: Status, file: File, type: Type) {
 		this.id = order.id;
 		this.description = order.description;
@@ -22,5 +22,6 @@ export class OrderDto {
 		this.file = file.path;
 		this.type = file.type;
 		this.name = type.name;
+		this.imgName = type.fileName;
 	}
 }

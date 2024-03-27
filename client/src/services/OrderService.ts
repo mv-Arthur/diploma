@@ -1,6 +1,5 @@
 import $api from "../http";
 import { Order } from "../models/IOrder";
-import { AddOrderResponse } from "../models/response/AddOrderResponse";
 
 export class OrderService {
 	static async addOrder(id: number, formData: FormData) {

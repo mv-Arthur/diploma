@@ -15,6 +15,7 @@ const token_model_1 = require("./token.model");
 const order_model_1 = require("./order.model");
 const vapid_model_1 = require("./vapid.model");
 const subscription_model_1 = require("./subscription.model");
+const personal_model_1 = require("./personal.model");
 let User = class User extends sequelize_typescript_1.Model {
 };
 exports.User = User;
@@ -67,6 +68,10 @@ __decorate([
     (0, sequelize_typescript_1.HasOne)(() => subscription_model_1.Subscription),
     __metadata("design:type", subscription_model_1.Subscription)
 ], User.prototype, "subscription", void 0);
+__decorate([
+    (0, sequelize_typescript_1.HasOne)(() => personal_model_1.Personal),
+    __metadata("design:type", personal_model_1.Personal)
+], User.prototype, "personal", void 0);
 exports.User = User = __decorate([
     (0, sequelize_typescript_1.Table)({ tableName: "user", timestamps: false })
 ], User);

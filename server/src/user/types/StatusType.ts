@@ -1,1 +1,1 @@
-export type StatusType = "pending" | "job" | "resolved";
+export type StatusType = "pending" | "job" | "resolved" | "rejected";

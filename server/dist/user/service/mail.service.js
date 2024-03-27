@@ -25,34 +25,32 @@ let MailService = class MailService {
         });
     }
     async sendActivationMail(to, link) {
-        console.log(process.env.SMPT_USER, process.env.API_URL);
         await this.transporter.sendMail({
             from: process.env.SMPT_USER,
             to: to,
             subject: `активация аккаунта на ${process.env.API_URL}`,
             text: "",
             html: `
-				<div>
-					<h1>Для активации перейдите по ссылке</h1>
-					<a href="${link}">${link}</a>
-				</div>
-			`,
+					<div>
+						<h1>Для активации перейдите по ссылке</h1>
+						<a href="${link}">${link}</a>
+					</div>
+				`,
         });
     }
     async sendActivationAdminMail(to, link, userEmail) {
-        console.log(process.env.SMPT_USER, process.env.API_URL);
         await this.transporter.sendMail({
             from: process.env.SMPT_USER,
             to: to,
             subject: `активация аккаунта для администратора на ${process.env.API_URL}`,
             text: "",
             html: `
-				<div>
-					<h1>Для активации роли для ${userEmail} перейдите по ссылке</h1>
-					<a href="${link}">${link}</a>
-					<h2>ВНИМАНИЕ, если вы не планировали менять роль пользователя, проигнорируйте сообщение</h2>
-				</div>
-			`,
+					<div>
+						<h1>Для активации роли для ${userEmail} перейдите по ссылке</h1>
+						<a href="${link}">${link}</a>
+						<h2>ВНИМАНИЕ, если вы не планировали менять роль пользователя, проигнорируйте сообщение</h2>
+					</div>
+				`,
         });
     }
 };

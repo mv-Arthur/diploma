@@ -29,6 +29,8 @@ const vapid_model_1 = require("./model/vapid.model");
 const subscription_model_1 = require("./model/subscription.model");
 const keys_model_1 = require("./model/keys.model");
 const platform_express_2 = require("@nestjs/platform-express");
+const personal_model_1 = require("./model/personal.model");
+const bot_service_1 = require("./service/bot.service");
 let UserModule = class UserModule {
 };
 exports.UserModule = UserModule;
@@ -43,6 +45,7 @@ exports.UserModule = UserModule = __decorate([
             jwt_auth_guard_1.JwtAuthGuard,
             order_service_1.OrderService,
             role_guard_1.RoleGuard,
+            bot_service_1.BotService,
         ],
         imports: [
             jwt_1.JwtModule.register({}),
@@ -57,6 +60,7 @@ exports.UserModule = UserModule = __decorate([
                 vapid_model_1.Vapid,
                 subscription_model_1.Subscription,
                 keys_model_1.Keys,
+                personal_model_1.Personal,
             ]),
             platform_express_1.MulterModule.register({
                 dest: "./dist/user/uploads",

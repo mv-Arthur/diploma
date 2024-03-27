@@ -6,7 +6,7 @@ import { File } from "../model/file.model";
 import { Status } from "../model/status.model";
 import { v4 as uuidv4 } from "uuid";
 import { join } from "path";
-import { rename, stat } from "fs";
+import { rename } from "fs";
 import { AddOrderDto } from "../dto/addOrder.dto";
 import { StatusType } from "../types/StatusType";
 import { Type } from "../model/type.model";
@@ -17,6 +17,8 @@ import { Vapid } from "../model/vapid.model";
 import { Subscription } from "../model/subscription.model";
 import { Keys } from "../model/keys.model";
 import { CreateTypeDto } from "../dto/createType.dto";
+import { Personal } from "../model/personal.model";
+import { PersonalDto } from "../dto/personalCreation.dto";
 @Injectable()
 export class OrderService {
 	constructor(
@@ -69,6 +71,8 @@ export class OrderService {
 		const status = await this.statusRepository.create({ orderId: order.id });
 		const allTypes = await this.typeRepository.findAll();
 		const types = allTypes.find((type) => type.type === fileDB.type);
+		order.price = types.minPrice;
+		await order.save();
 		const admins = await this.userRepository.findAll({
 			where: {
 				role: "admin",
@@ -186,6 +190,10 @@ export class OrderService {
 			message = "готово к выдаче";
 		}
 
+		if (status === "rejected") {
+			message = "отклонено";
+		}
+
 		if (!message) {
 			message = "ожидает принятия";
 		}
@@ -231,8 +239,7 @@ export class OrderService {
 	}
 
 	async createType(dto: CreateTypeDto, file: Express.Multer.File) {
-		// console.log(name, type);
-		const { type, name } = dto;
+		const { type, name, description, minPrice } = dto;
 		const typeDb = await this.typeRepository.findOne({ where: { type } });
 
 		if (typeDb) {
@@ -258,6 +265,8 @@ export class OrderService {
 			name,
 			type,
 			fileName,
+			description,
+			minPrice,
 		});
 
 		return newType;
@@ -304,18 +313,27 @@ export class OrderService {
 			const status = order.status;
 			const file = order.file;
 			const type = types.find((type) => type.type === file.type);
-			if (type) return new OrderDto(order, status, file, type);
+			if (type) {
+				const orderDto = new OrderDto(order, status, file, type);
+				return {
+					...orderDto,
+				};
+			}
 			return null;
 		});
 	}
 
 	async getAllOrder() {
 		const users = await this.userRepository.findAll({
-			include: {
-				model: Order,
-				include: [Status, File],
-			},
+			include: [
+				Personal,
+				{
+					model: Order,
+					include: [Status, File],
+				},
+			],
 		});
+
 		const types = await this.typeRepository.findAll();
 
 		return users.map((user) => {
@@ -324,6 +342,8 @@ export class OrderService {
 			return {
 				id: user.id,
 				email: user.email,
+				role: user.role,
+				personal: new PersonalDto(user.personal),
 				order: order.map((order) => {
 					const { status, file } = order;
 					const foundedType = types.find((type) => type.type === file.type);
@@ -338,7 +358,10 @@ export class OrderService {
 							type: null,
 							name: null,
 						};
-					return new OrderDto(order, status, file, foundedType);
+					const orderDto = new OrderDto(order, status, file, foundedType);
+					return {
+						...orderDto,
+					};
 				}),
 			};
 		});

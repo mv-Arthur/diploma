@@ -13,7 +13,7 @@ export const OrderArea = observer(() => {
 	const handleDownload = (id: number) => {
 		window.location.href = `${API_URL}/user/download/${id}`;
 	};
-
+	console.log(orderStore.orders);
 	return (
 		<div
 			style={{

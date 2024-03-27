@@ -22,6 +22,8 @@ import { Keys } from "./model/keys.model";
 import * as express from "express";
 import { join } from "path";
 import { ExpressAdapter } from "@nestjs/platform-express";
+import { Personal } from "./model/personal.model";
+import { BotService } from "./service/bot.service";
 @Module({
 	controllers: [UserController],
 	providers: [
@@ -32,6 +34,7 @@ import { ExpressAdapter } from "@nestjs/platform-express";
 		JwtAuthGuard,
 		OrderService,
 		RoleGuard,
+		BotService,
 	],
 	imports: [
 		JwtModule.register({}),
@@ -46,6 +49,7 @@ import { ExpressAdapter } from "@nestjs/platform-express";
 			Vapid,
 			Subscription,
 			Keys,
+			Personal,
 		]),
 		MulterModule.register({
 			dest: "./dist/user/uploads",

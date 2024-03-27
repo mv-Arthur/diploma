@@ -1,3 +1,4 @@
+/// <reference types="multer" />
 import { UserDto } from "../dto/user.dto";
 import { User } from "../model/user.model";
 import { MailService } from "./mail.service";
@@ -6,16 +7,25 @@ import { Vapid } from "../model/vapid.model";
 import { PushSubscription } from "../user.controller";
 import { Keys } from "../model/keys.model";
 import { Subscription } from "../model/subscription.model";
+import { Personal } from "../model/personal.model";
+import { OrderService } from "./order.service";
+import { PersonalDto } from "../dto/personalCreation.dto";
+import { BotService } from "./bot.service";
 export declare class UserService {
     private userRepository;
     private mailService;
     private tokenService;
+    private orderService;
     private vapidRepository;
     private keysRepository;
     private subsciptionRepository;
-    constructor(userRepository: typeof User, mailService: MailService, tokenService: TokenService, vapidRepository: typeof Vapid, keysRepository: typeof Keys, subsciptionRepository: typeof Subscription);
+    private personalRepository;
+    private botService;
+    constructor(userRepository: typeof User, mailService: MailService, tokenService: TokenService, orderService: OrderService, vapidRepository: typeof Vapid, keysRepository: typeof Keys, subsciptionRepository: typeof Subscription, personalRepository: typeof Personal, botService: BotService);
+    _: void;
     registration(email: string, password: string): Promise<{
         user: UserDto;
+        personal: PersonalDto;
         accessToken: string;
         refreshToken: string;
     }>;
@@ -27,13 +37,20 @@ export declare class UserService {
     activateAdmin(activationLinkAdmin: string): Promise<void>;
     login(email: string, password: string): Promise<{
         user: UserDto;
+        personal: PersonalDto;
         accessToken: string;
         refreshToken: string;
     }>;
     logout(refreshToken: string): Promise<import("../model/token.model").Token>;
     refresh(refreshToken: string): Promise<{
         user: UserDto;
+        personal: PersonalDto;
         accessToken: string;
         refreshToken: string;
     }>;
+    setName(userId: number, name: string): Promise<string>;
+    setSurname(userId: number, surname: string): Promise<string>;
+    setPatronymic(userId: number, patronymic: string): Promise<string>;
+    phoneNumber(userId: number, phoneNumber: string): Promise<string>;
+    setAvatar(userId: number, file: Express.Multer.File): Promise<string>;
 }

@@ -11,6 +11,7 @@ class OrderDto {
         this.file = file.path;
         this.type = file.type;
         this.name = type.name;
+        this.imgName = type.fileName;
     }
 }
 exports.OrderDto = OrderDto;

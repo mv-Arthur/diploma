@@ -37,9 +37,9 @@ class TypeStore {
 		}
 	}
 
-	async addNewFetch(name: string, type: string) {
+	async addNewFetch(formData: FormData) {
 		try {
-			const response = await OrderTypeService.addType(name, type);
+			const response = await OrderTypeService.addType(formData);
 			this.addNewType(response.data.data);
 		} catch (err: any) {
 			console.log(err.response.data.message);

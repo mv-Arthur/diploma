@@ -8,6 +8,7 @@ import { StatusType } from "../types/StatusType";
 import { Type } from "../model/type.model";
 import { OrderDto } from "../dto/order.dto";
 import { CreateTypeDto } from "../dto/createType.dto";
+import { PersonalDto } from "../dto/personalCreation.dto";
 export declare class OrderService {
     private orderRepository;
     private userRepository;
@@ -27,10 +28,41 @@ export declare class OrderService {
     deleteType(id: number): Promise<{
         deletedTypeId: any;
     }>;
-    getOrderById(id: number): Promise<OrderDto[]>;
+    getOrderById(id: number): Promise<{
+        id: number;
+        description: string;
+        price: string;
+        status: string;
+        message: string;
+        file: string;
+        type: string;
+        name: string;
+        imgName: string;
+    }[]>;
     getAllOrder(): Promise<{
         id: number;
         email: string;
-        order: OrderDto[];
+        role: import("../types/RoleType").RoleType;
+        personal: PersonalDto;
+        order: ({
+            id: number;
+            description: any;
+            price: any;
+            status: any;
+            message: any;
+            file: any;
+            type: any;
+            name: any;
+        } | {
+            id: number;
+            description: string;
+            price: string;
+            status: string;
+            message: string;
+            file: string;
+            type: string;
+            name: string;
+            imgName: string;
+        })[];
     }[]>;
 }

@@ -26,6 +26,14 @@ __decorate([
     (0, sequelize_typescript_1.Column)({ type: sequelize_typescript_1.DataType.STRING, allowNull: false, unique: true }),
     __metadata("design:type", String)
 ], Type.prototype, "fileName", void 0);
+__decorate([
+    (0, sequelize_typescript_1.Column)({ type: sequelize_typescript_1.DataType.STRING, allowNull: false, unique: false }),
+    __metadata("design:type", String)
+], Type.prototype, "description", void 0);
+__decorate([
+    (0, sequelize_typescript_1.Column)({ type: sequelize_typescript_1.DataType.STRING, allowNull: false, unique: false }),
+    __metadata("design:type", String)
+], Type.prototype, "minPrice", void 0);
 exports.Type = Type = __decorate([
     (0, sequelize_typescript_1.Table)({ tableName: "type", timestamps: false })
 ], Type);

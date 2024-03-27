@@ -6,6 +6,12 @@ import Select, { SelectChangeEvent } from "@mui/material/Select";
 import MenuItem from "@mui/material/MenuItem";
 import FormControl from "@mui/material/FormControl";
 import Paper from "@mui/material/Paper";
+import Card from "@mui/material/Card";
+import CardContent from "@mui/material/CardContent";
+import CardMedia from "@mui/material/CardMedia";
+import { CardActionArea, CardActions } from "@mui/material";
+import { API_URL } from "../http";
+import Typography from "@mui/material/Typography";
 type PropsType = {
 	order: Order;
 	handleDownload: (id: number) => void;
@@ -26,50 +32,66 @@ export const OrderComponent: React.FC<PropsType> = (props) => {
 	const clickHandler = () => {
 		if (props.handleGet) props.handleGet(status, price, props.order.id);
 	};
-
+	console.log(props.order);
 	return (
-		<Paper style={{ width: "210px", height: "260px" }}>
-			<div>описание: {props.order.description}</div>
-			<div>
-				цена:{" "}
-				{props.editble ? (
-					<TextField
-						type="number"
-						id="standard-basic"
-						value={price}
-						onChange={handleChangeText}
-						label="цена"
-						variant="standard"
-					/>
-				) : (
-					props.order.price
-				)}
-			</div>
-			<div>
-				статус:{" "}
-				{props.editble ? (
-					<FormControl variant="standard" sx={{ m: 1, minWidth: 120 }}>
-						<Select
-							labelId="demo-simple-select-standard-label"
-							id="demo-simple-select-standard"
-							value={status}
-							label="Статус"
-							onChange={handleChange}
-						>
-							<MenuItem value={"pending"}>ожидает принятия</MenuItem>
-							<MenuItem value={"job"}>в работе</MenuItem>
-							<MenuItem value={"resolved"}>готово к выдаче</MenuItem>
-						</Select>
-					</FormControl>
-				) : (
-					props.order.message
-				)}
-			</div>
-			<div>тип: {props.order.name}</div>
-			<div>
-				файл <Button onClick={() => props.handleDownload(props.order.id)}>Скачать</Button>
-			</div>
-			<div>{props.editble && <Button onClick={clickHandler}>Сохранить</Button>}</div>
-		</Paper>
+		<Card sx={{ width: 300, height: props.editble ? "450px" : "350px" }}>
+			<CardActionArea>
+				<CardMedia
+					component="img"
+					height="140"
+					image={`${API_URL}/uploads/${props.order.imgName}`}
+				/>
+				<CardContent>
+					<Typography gutterBottom variant="h5" component="div">
+						{props.order.name}
+					</Typography>
+					<Typography
+						style={{ wordBreak: "break-all" }}
+						variant="body2"
+						color="text.secondary"
+					>
+						{props.order.description}
+						<br />
+						цена -{" "}
+						{props.editble ? (
+							<TextField
+								type="number"
+								id="standard-basic"
+								value={price}
+								onChange={handleChangeText}
+								variant="standard"
+							/>
+						) : (
+							props.order.price
+						)}
+						р
+						<br />
+						статус -{" "}
+						{props.editble ? (
+							<FormControl variant="standard" sx={{ m: 1, minWidth: 120 }}>
+								<Select
+									labelId="demo-simple-select-standard-label"
+									id="demo-simple-select-standard"
+									value={status}
+									label="Статус"
+									onChange={handleChange}
+								>
+									<MenuItem value={"pending"}>ожидает принятия</MenuItem>
+									<MenuItem value={"job"}>в работе</MenuItem>
+									<MenuItem value={"resolved"}>готово к выдаче</MenuItem>
+									<MenuItem value={"rejected"}>отклонено</MenuItem>
+								</Select>
+							</FormControl>
+						) : (
+							props.order.message
+						)}
+						<br />
+						файл -
+						<Button onClick={() => props.handleDownload(props.order.id)}>Скачать</Button>
+						<div>{props.editble && <Button onClick={clickHandler}>Сохранить</Button>}</div>
+					</Typography>
+				</CardContent>
+			</CardActionArea>
+		</Card>
 	);
 };

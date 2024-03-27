@@ -28,6 +28,14 @@ import { SetPriceDto } from "./dto/setPrice.dto";
 import { SetStatusDto } from "./dto/setStatus.dto";
 import { updateDescriptionDto } from "./dto/updateDescription.dto";
 import { CreateTypeDto } from "./dto/createType.dto";
+import {
+	AvatarDto,
+	nameDto,
+	patronymicDto,
+	phoneNumberDto,
+	surnameDto,
+} from "./dto/personalCreation.dto";
+import { BotService } from "./service/bot.service";
 
 export interface PushSubscription {
 	endpoint: string;
@@ -41,7 +49,8 @@ export interface PushSubscription {
 export class UserController {
 	constructor(
 		private userService: UserService,
-		private orderService: OrderService
+		private orderService: OrderService,
+		private botService: BotService
 	) {}
 	@UsePipes(ValidationPipe)
 	@Post("/registration")
@@ -203,7 +212,7 @@ export class UserController {
 	@Patch("/setStatus")
 	async setStatus(@Body() dto: SetStatusDto) {
 		const { id, status } = dto;
-		if (!["pending", "job", "resolved"].includes(status)) {
+		if (!["pending", "job", "resolved", "rejected"].includes(status)) {
 			throw new HttpException("неверный статус", HttpStatus.BAD_REQUEST);
 		}
 		await this.orderService.setStatus(id, status);
@@ -255,5 +264,36 @@ export class UserController {
 	@Get("/test")
 	async testToGetUsersByAdmin() {
 		return this.orderService.getAlluser();
+	}
+
+	@Patch("/name")
+	async setName(@Body() dto: nameDto) {
+		const { userId, name } = dto;
+		return await this.userService.setName(userId, name);
+	}
+
+	@Patch("/surname")
+	async setSurname(@Body() dto: surnameDto) {
+		const { userId, surname } = dto;
+		return await this.userService.setSurname(userId, surname);
+	}
+
+	@Patch("/patronymic")
+	async setPatronymic(@Body() dto: patronymicDto) {
+		const { userId, patronymic } = dto;
+		return await this.userService.setPatronymic(userId, patronymic);
+	}
+
+	@Patch("/phoneNumber")
+	async setPhoneNumber(@Body() dto: phoneNumberDto) {
+		const { userId, phoneNumber } = dto;
+		return await this.userService.phoneNumber(userId, phoneNumber);
+	}
+
+	@Patch("/avatar")
+	@UseInterceptors(FileInterceptor("file"))
+	async setAvatar(@Body() dto: AvatarDto, @UploadedFile() file: Express.Multer.File) {
+		const { userId } = dto;
+		return await this.userService.setAvatar(userId, file);
 	}
 }

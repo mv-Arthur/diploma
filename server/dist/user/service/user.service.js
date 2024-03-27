@@ -25,14 +25,24 @@ const vapid_model_1 = require("../model/vapid.model");
 const webPush = require("web-push");
 const keys_model_1 = require("../model/keys.model");
 const subscription_model_1 = require("../model/subscription.model");
+const personal_model_1 = require("../model/personal.model");
+const order_service_1 = require("./order.service");
+const path_1 = require("path");
+const fs_1 = require("fs");
+const personalCreation_dto_1 = require("../dto/personalCreation.dto");
+const bot_service_1 = require("./bot.service");
 let UserService = class UserService {
-    constructor(userRepository, mailService, tokenService, vapidRepository, keysRepository, subsciptionRepository) {
+    constructor(userRepository, mailService, tokenService, orderService, vapidRepository, keysRepository, subsciptionRepository, personalRepository, botService) {
         this.userRepository = userRepository;
         this.mailService = mailService;
         this.tokenService = tokenService;
+        this.orderService = orderService;
         this.vapidRepository = vapidRepository;
         this.keysRepository = keysRepository;
         this.subsciptionRepository = subsciptionRepository;
+        this.personalRepository = personalRepository;
+        this.botService = botService;
+        this._ = this.botService.start();
     }
     async registration(email, password) {
         const candidate = await this.userRepository.findOne({ where: { email: email } });
@@ -49,7 +59,8 @@ let UserService = class UserService {
             activationLinkAdmin: activationLinkAdmin,
         });
         await this.mailService.sendActivationMail(email, `${process.env.API_URL}/user/activate/${activationLink}`);
-        await this.mailService.sendActivationAdminMail(process.env.EMAIL_ADMIN, `${process.env.API_URL}/user/activate/admin/${activationLinkAdmin}`, user.email);
+        const users = await this.userRepository.findAll();
+        await this.botService.sendActivationAdmin(activationLinkAdmin);
         const userDto = new user_dto_1.UserDto(user);
         const tokens = this.tokenService.generateToken({ ...userDto });
         await this.tokenService.saveToken(userDto.id, tokens.refreshToken);
@@ -59,9 +70,19 @@ let UserService = class UserService {
             publicKey: twins.publicKey,
             privateKey: twins.privateKey,
         });
+        const personal = await this.personalRepository.create({
+            name: "",
+            surname: "",
+            phoneNumber: "",
+            patronymic: "",
+            userId: userDto.id,
+            avatar: "",
+        });
+        const personalDto = new personalCreation_dto_1.PersonalDto(personal);
         return {
             ...tokens,
             user: userDto,
+            personal: personalDto,
         };
     }
     async subscribe(sub, id) {
@@ -154,9 +175,16 @@ let UserService = class UserService {
         const userDto = new user_dto_1.UserDto(user);
         const tokens = this.tokenService.generateToken({ ...userDto });
         await this.tokenService.saveToken(userDto.id, tokens.refreshToken);
+        const personal = await this.personalRepository.findOne({
+            where: {
+                userId: userDto.id,
+            },
+        });
+        const personalDto = new personalCreation_dto_1.PersonalDto(personal);
         return {
             ...tokens,
             user: userDto,
+            personal: personalDto,
         };
     }
     async logout(refreshToken) {
@@ -178,20 +206,101 @@ let UserService = class UserService {
         const userDto = new user_dto_1.UserDto(user);
         const tokens = this.tokenService.generateToken({ ...userDto });
         await this.tokenService.saveToken(userDto.id, tokens.refreshToken);
+        const personal = await this.personalRepository.findOne({
+            where: {
+                userId: userDto.id,
+            },
+        });
+        const personalDto = new personalCreation_dto_1.PersonalDto(personal);
         return {
             ...tokens,
             user: userDto,
+            personal: personalDto,
         };
+    }
+    async setName(userId, name) {
+        const personal = await this.personalRepository.findOne({
+            where: {
+                userId,
+            },
+        });
+        if (!personal)
+            throw new common_1.HttpException("пользователь не найден", common_1.HttpStatus.BAD_REQUEST);
+        personal.name = name;
+        await personal.save();
+        return personal.name;
+    }
+    async setSurname(userId, surname) {
+        const personal = await this.personalRepository.findOne({
+            where: {
+                userId,
+            },
+        });
+        if (!personal)
+            throw new common_1.HttpException("пользователь не найден", common_1.HttpStatus.BAD_REQUEST);
+        personal.surname = surname;
+        await personal.save();
+        return personal.surname;
+    }
+    async setPatronymic(userId, patronymic) {
+        const personal = await this.personalRepository.findOne({
+            where: {
+                userId,
+            },
+        });
+        if (!personal)
+            throw new common_1.HttpException("пользователь не найден", common_1.HttpStatus.BAD_REQUEST);
+        personal.patronymic = patronymic;
+        await personal.save();
+        return personal.patronymic;
+    }
+    async phoneNumber(userId, phoneNumber) {
+        const personal = await this.personalRepository.findOne({
+            where: {
+                userId,
+            },
+        });
+        if (!personal)
+            throw new common_1.HttpException("пользователь не найден", common_1.HttpStatus.BAD_REQUEST);
+        personal.phoneNumber = phoneNumber;
+        await personal.save();
+        return personal.phoneNumber;
+    }
+    async setAvatar(userId, file) {
+        const extention = this.orderService.getExtension(file.originalname);
+        const fileName = (0, uuid_1.v4)() + `.${extention}`;
+        const filePath = (0, path_1.join)(__dirname, "..", "uploads", fileName);
+        if (extention) {
+            (0, fs_1.rename)(file.path, filePath, (err) => {
+                if (err) {
+                    console.error(err);
+                    throw new common_1.HttpException("ошибка при чтении файла", common_1.HttpStatus.BAD_REQUEST);
+                }
+                console.log(`переименован успешно`);
+            });
+        }
+        const personal = await this.personalRepository.findOne({
+            where: {
+                userId,
+            },
+        });
+        if (!personal)
+            throw new common_1.HttpException("пользователь не найден", common_1.HttpStatus.BAD_REQUEST);
+        personal.avatar = fileName;
+        personal.save();
+        return personal.avatar;
     }
 };
 exports.UserService = UserService;
 exports.UserService = UserService = __decorate([
     (0, common_1.Injectable)(),
     __param(0, (0, sequelize_1.InjectModel)(user_model_1.User)),
-    __param(3, (0, sequelize_1.InjectModel)(vapid_model_1.Vapid)),
-    __param(4, (0, sequelize_1.InjectModel)(keys_model_1.Keys)),
-    __param(5, (0, sequelize_1.InjectModel)(subscription_model_1.Subscription)),
+    __param(4, (0, sequelize_1.InjectModel)(vapid_model_1.Vapid)),
+    __param(5, (0, sequelize_1.InjectModel)(keys_model_1.Keys)),
+    __param(6, (0, sequelize_1.InjectModel)(subscription_model_1.Subscription)),
+    __param(7, (0, sequelize_1.InjectModel)(personal_model_1.Personal)),
     __metadata("design:paramtypes", [Object, mail_service_1.MailService,
-        token_service_1.TokenService, Object, Object, Object])
+        token_service_1.TokenService,
+        order_service_1.OrderService, Object, Object, Object, Object, bot_service_1.BotService])
 ], UserService);
 //# sourceMappingURL=user.service.js.map

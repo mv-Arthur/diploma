@@ -8,6 +8,8 @@ import { SetPriceDto } from "./dto/setPrice.dto";
 import { SetStatusDto } from "./dto/setStatus.dto";
 import { updateDescriptionDto } from "./dto/updateDescription.dto";
 import { CreateTypeDto } from "./dto/createType.dto";
+import { AvatarDto, nameDto, patronymicDto, phoneNumberDto, surnameDto } from "./dto/personalCreation.dto";
+import { BotService } from "./service/bot.service";
 export interface PushSubscription {
     endpoint: string;
     expirationTime?: number | null;
@@ -19,7 +21,8 @@ export interface PushSubscription {
 export declare class UserController {
     private userService;
     private orderService;
-    constructor(userService: UserService, orderService: OrderService);
+    private botService;
+    constructor(userService: UserService, orderService: OrderService, botService: BotService);
     registration(dto: RegistrationDto, res: Response): Promise<Response<any, Record<string, any>>>;
     subscription(req: Request, res: Response): Promise<{
         message: string;
@@ -36,11 +39,42 @@ export declare class UserController {
     activate(activationLink: string, res: Response): Promise<void | Response<any, Record<string, any>>>;
     refresh(req: Request, res: Response): Promise<Response<any, Record<string, any>>>;
     addOrder(dto: AddOrderDto, file: Express.Multer.File, userId: number): Promise<import("./dto/order.dto").OrderDto>;
-    getOrder(id: number): Promise<import("./dto/order.dto").OrderDto[]>;
+    getOrder(id: number): Promise<{
+        id: number;
+        description: string;
+        price: string;
+        status: string;
+        message: string;
+        file: string;
+        type: string;
+        name: string;
+        imgName: string;
+    }[]>;
     getAllOrder(): Promise<{
         id: number;
         email: string;
-        order: import("./dto/order.dto").OrderDto[];
+        role: import("./types/RoleType").RoleType;
+        personal: import("./dto/personalCreation.dto").PersonalDto;
+        order: ({
+            id: number;
+            description: any;
+            price: any;
+            status: any;
+            message: any;
+            file: any;
+            type: any;
+            name: any;
+        } | {
+            id: number;
+            description: string;
+            price: string;
+            status: string;
+            message: string;
+            file: string;
+            type: string;
+            name: string;
+            imgName: string;
+        })[];
     }[]>;
     activateAdmin(activationAdminLink: string): Promise<{
         message: string;
@@ -64,4 +98,9 @@ export declare class UserController {
         deletedTypeId: any;
     }>;
     testToGetUsersByAdmin(): Promise<import("./model/user.model").User[]>;
+    setName(dto: nameDto): Promise<string>;
+    setSurname(dto: surnameDto): Promise<string>;
+    setPatronymic(dto: patronymicDto): Promise<string>;
+    setPhoneNumber(dto: phoneNumberDto): Promise<string>;
+    setAvatar(dto: AvatarDto, file: Express.Multer.File): Promise<string>;
 }

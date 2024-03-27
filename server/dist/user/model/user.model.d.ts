@@ -4,6 +4,7 @@ import { RoleType } from "../types/RoleType";
 import { Order } from "./order.model";
 import { Vapid } from "./vapid.model";
 import { Subscription } from "./subscription.model";
+import { Personal } from "./personal.model";
 interface CreationAttrs {
     email: string;
     password: string;
@@ -22,5 +23,6 @@ export declare class User extends Model<User, CreationAttrs> {
     order: Order[];
     vapid: Vapid;
     subscription: Subscription;
+    personal: Personal;
 }
 export {};

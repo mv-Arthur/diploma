@@ -11,5 +11,6 @@ export declare class OrderDto {
     file: string;
     type: string;
     name: string;
+    imgName: string;
     constructor(order: Order, status: Status, file: File, type: Type);
 }

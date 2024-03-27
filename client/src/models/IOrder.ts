@@ -13,4 +13,5 @@ export interface Order {
 	file: string;
 	type: string;
 	name: string;
+	imgName: string;
 }

@@ -26,10 +26,13 @@ const setPrice_dto_1 = require("./dto/setPrice.dto");
 const setStatus_dto_1 = require("./dto/setStatus.dto");
 const updateDescription_dto_1 = require("./dto/updateDescription.dto");
 const createType_dto_1 = require("./dto/createType.dto");
+const personalCreation_dto_1 = require("./dto/personalCreation.dto");
+const bot_service_1 = require("./service/bot.service");
 let UserController = class UserController {
-    constructor(userService, orderService) {
+    constructor(userService, orderService, botService) {
         this.userService = userService;
         this.orderService = orderService;
+        this.botService = botService;
     }
     async registration(dto, res) {
         try {
@@ -157,7 +160,7 @@ let UserController = class UserController {
     }
     async setStatus(dto) {
         const { id, status } = dto;
-        if (!["pending", "job", "resolved"].includes(status)) {
+        if (!["pending", "job", "resolved", "rejected"].includes(status)) {
             throw new common_1.HttpException("неверный статус", common_1.HttpStatus.BAD_REQUEST);
         }
         await this.orderService.setStatus(id, status);
@@ -191,6 +194,26 @@ let UserController = class UserController {
     }
     async testToGetUsersByAdmin() {
         return this.orderService.getAlluser();
+    }
+    async setName(dto) {
+        const { userId, name } = dto;
+        return await this.userService.setName(userId, name);
+    }
+    async setSurname(dto) {
+        const { userId, surname } = dto;
+        return await this.userService.setSurname(userId, surname);
+    }
+    async setPatronymic(dto) {
+        const { userId, patronymic } = dto;
+        return await this.userService.setPatronymic(userId, patronymic);
+    }
+    async setPhoneNumber(dto) {
+        const { userId, phoneNumber } = dto;
+        return await this.userService.phoneNumber(userId, phoneNumber);
+    }
+    async setAvatar(dto, file) {
+        const { userId } = dto;
+        return await this.userService.setAvatar(userId, file);
     }
 };
 exports.UserController = UserController;
@@ -359,9 +382,47 @@ __decorate([
     __metadata("design:paramtypes", []),
     __metadata("design:returntype", Promise)
 ], UserController.prototype, "testToGetUsersByAdmin", null);
+__decorate([
+    (0, common_1.Patch)("/name"),
+    __param(0, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [personalCreation_dto_1.nameDto]),
+    __metadata("design:returntype", Promise)
+], UserController.prototype, "setName", null);
+__decorate([
+    (0, common_1.Patch)("/surname"),
+    __param(0, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [personalCreation_dto_1.surnameDto]),
+    __metadata("design:returntype", Promise)
+], UserController.prototype, "setSurname", null);
+__decorate([
+    (0, common_1.Patch)("/patronymic"),
+    __param(0, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [personalCreation_dto_1.patronymicDto]),
+    __metadata("design:returntype", Promise)
+], UserController.prototype, "setPatronymic", null);
+__decorate([
+    (0, common_1.Patch)("/phoneNumber"),
+    __param(0, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [personalCreation_dto_1.phoneNumberDto]),
+    __metadata("design:returntype", Promise)
+], UserController.prototype, "setPhoneNumber", null);
+__decorate([
+    (0, common_1.Patch)("/avatar"),
+    (0, common_1.UseInterceptors)((0, platform_express_1.FileInterceptor)("file")),
+    __param(0, (0, common_1.Body)()),
+    __param(1, (0, common_1.UploadedFile)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [personalCreation_dto_1.AvatarDto, Object]),
+    __metadata("design:returntype", Promise)
+], UserController.prototype, "setAvatar", null);
 exports.UserController = UserController = __decorate([
     (0, common_1.Controller)("user"),
     __metadata("design:paramtypes", [user_service_1.UserService,
-        order_service_1.OrderService])
+        order_service_1.OrderService,
+        bot_service_1.BotService])
 ], UserController);
 //# sourceMappingURL=user.controller.js.map

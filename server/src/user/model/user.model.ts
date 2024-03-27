@@ -4,6 +4,7 @@ import { RoleType } from "../types/RoleType";
 import { Order } from "./order.model";
 import { Vapid } from "./vapid.model";
 import { Subscription } from "./subscription.model";
+import { Personal } from "./personal.model";
 
 interface CreationAttrs {
 	email: string;
@@ -41,4 +42,6 @@ export class User extends Model<User, CreationAttrs> {
 	vapid: Vapid;
 	@HasOne(() => Subscription)
 	subscription: Subscription;
+	@HasOne(() => Personal)
+	personal: Personal;
 }
