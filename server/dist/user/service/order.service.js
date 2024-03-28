@@ -30,13 +30,17 @@ const subscription_model_1 = require("../model/subscription.model");
 const keys_model_1 = require("../model/keys.model");
 const personal_model_1 = require("../model/personal.model");
 const personalCreation_dto_1 = require("../dto/personalCreation.dto");
+const report_model_1 = require("../model/report.model");
+const dateU_model_1 = require("../model/dateU.model");
 let OrderService = class OrderService {
-    constructor(orderRepository, userRepository, fileRepository, statusRepository, typeRepository) {
+    constructor(orderRepository, userRepository, fileRepository, statusRepository, typeRepository, reportRepository, dateURepository) {
         this.orderRepository = orderRepository;
         this.userRepository = userRepository;
         this.fileRepository = fileRepository;
         this.statusRepository = statusRepository;
         this.typeRepository = typeRepository;
+        this.reportRepository = reportRepository;
+        this.dateURepository = dateURepository;
     }
     getExtension(filename) {
         const match = /\.([0-9a-z]+)$/i.exec(filename);
@@ -324,6 +328,82 @@ let OrderService = class OrderService {
             };
         });
     }
+    async getAllByAcc() {
+        const users = await this.userRepository.findAll({
+            include: [{ model: order_model_1.Order, include: [status_model_1.Status, file_model_1.File] }, personal_model_1.Personal],
+        });
+        const types = await this.typeRepository.findAll();
+        const res = [];
+        const mapped = users.map((user) => {
+            if (user.role === "admin" || user.role === "accounting")
+                return;
+            return user.order.map((order) => {
+                const founded = types.find((type) => type.type === order.file.type);
+                return {
+                    orderId: order.id,
+                    name: user.personal.name,
+                    surname: user.personal.surname,
+                    patronymic: user.personal.patronymic,
+                    phoneNumber: user.personal.phoneNumber,
+                    orderType: founded.name,
+                    orderPrice: order.price,
+                    userEmail: user.email,
+                    orderDescription: order.description,
+                    status: order.status.status,
+                };
+            });
+        });
+        const filtered = mapped.filter((el) => !!el);
+        filtered.forEach((el) => {
+            res.push(...el);
+        });
+        return res.filter((el) => el.status === "resolved" || el.status === "rejected");
+    }
+    getDate() {
+        const today = new Date();
+        const year = today.getFullYear();
+        const month = String(today.getMonth() + 1).padStart(2, "0");
+        const day = String(today.getDate()).padStart(2, "0");
+        const currentDate = `${day}-${month}-${year}`;
+        return currentDate;
+    }
+    async setReport() {
+        let rejQty = 0;
+        let fullfiledQty = 0;
+        let rev = 0;
+        const orders = await this.getAllByAcc();
+        console.log(orders);
+        const dateU = await this.dateURepository.create({
+            revenue: "",
+            date: this.getDate(),
+            rejectedQty: "",
+            fullfiledQty: "",
+        });
+        const mapped = orders.map((order) => {
+            return { ...order, dateUId: dateU.id };
+        });
+        const reports = await this.reportRepository.bulkCreate(mapped);
+        for (let i = 0; i < reports.length; i++) {
+            if (reports[i].status === "rejected") {
+                rejQty += 1;
+            }
+            if (reports[i].status === "resolved") {
+                fullfiledQty += 1;
+                rev += Number(reports[i].orderPrice);
+            }
+        }
+        dateU.revenue = String(rev);
+        dateU.rejectedQty = String(rejQty);
+        dateU.fullfiledQty = String(fullfiledQty);
+        await dateU.save();
+        return {
+            message: "Успех",
+        };
+    }
+    async getRevenue() {
+        const rev = await this.dateURepository.findAll({ include: { all: true } });
+        return rev;
+    }
 };
 exports.OrderService = OrderService;
 exports.OrderService = OrderService = __decorate([
@@ -333,6 +413,8 @@ exports.OrderService = OrderService = __decorate([
     __param(2, (0, sequelize_1.InjectModel)(file_model_1.File)),
     __param(3, (0, sequelize_1.InjectModel)(status_model_1.Status)),
     __param(4, (0, sequelize_1.InjectModel)(type_model_1.Type)),
-    __metadata("design:paramtypes", [Object, Object, Object, Object, Object])
+    __param(5, (0, sequelize_1.InjectModel)(report_model_1.Report)),
+    __param(6, (0, sequelize_1.InjectModel)(dateU_model_1.DateU)),
+    __metadata("design:paramtypes", [Object, Object, Object, Object, Object, Object, Object])
 ], OrderService);
 //# sourceMappingURL=order.service.js.map

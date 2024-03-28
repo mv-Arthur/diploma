@@ -215,6 +215,12 @@ let UserController = class UserController {
         const { userId } = dto;
         return await this.userService.setAvatar(userId, file);
     }
+    async report() {
+        return await this.orderService.setReport();
+    }
+    async getAllAcc() {
+        return await this.orderService.getRevenue();
+    }
 };
 exports.UserController = UserController;
 __decorate([
@@ -419,6 +425,18 @@ __decorate([
     __metadata("design:paramtypes", [personalCreation_dto_1.AvatarDto, Object]),
     __metadata("design:returntype", Promise)
 ], UserController.prototype, "setAvatar", null);
+__decorate([
+    (0, common_1.Post)("/acc"),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", []),
+    __metadata("design:returntype", Promise)
+], UserController.prototype, "report", null);
+__decorate([
+    (0, common_1.Get)("acc"),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", []),
+    __metadata("design:returntype", Promise)
+], UserController.prototype, "getAllAcc", null);
 exports.UserController = UserController = __decorate([
     (0, common_1.Controller)("user"),
     __metadata("design:paramtypes", [user_service_1.UserService,

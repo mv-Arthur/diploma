@@ -22,6 +22,7 @@ import HomeIcon from "@mui/icons-material/Home";
 import Drawer from "@mui/material/Drawer";
 import SupervisedUserCircleIcon from "@mui/icons-material/SupervisedUserCircle";
 import TypeSpecimenIcon from "@mui/icons-material/TypeSpecimen";
+import { RoleType } from "../models/RoleType";
 const CHeader = () => {
 	const [open, setOpen] = React.useState(false);
 	const { store } = useContext(Context);
@@ -97,6 +98,52 @@ const CHeader = () => {
 		</Box>
 	);
 
+	const DrawnerListAcc = (
+		<Box sx={{ width: 250 }} role="presentation" onClick={toggleDrawer(false)}>
+			<List>
+				<ListItem disablePadding>
+					<ListItemButton onClick={() => navigate("/types")}>
+						<ListItemIcon>
+							{" "}
+							<TypeSpecimenIcon />
+						</ListItemIcon>
+						<ListItemText primary={"Услуги"} />
+					</ListItemButton>
+				</ListItem>
+				<ListItem disablePadding>
+					<ListItemButton onClick={() => navigate("/user")}>
+						<ListItemIcon>
+							{" "}
+							<SupervisedUserCircleIcon />
+						</ListItemIcon>
+						<ListItemText primary={"Отчеты"} />
+					</ListItemButton>
+				</ListItem>
+				<ListItem disablePadding>
+					<ListItemButton onClick={() => navigate("/office")}>
+						<ListItemIcon>
+							{" "}
+							<HomeIcon />
+						</ListItemIcon>
+						<ListItemText primary={"Личный кабинет"} />
+					</ListItemButton>
+				</ListItem>
+			</List>
+		</Box>
+	);
+
+	const choise = (role: RoleType) => {
+		if (role === "user") return "Пользователь";
+		if (role === "accounting") return "Бухгалтер";
+		if (role === "admin") return "Администратор";
+	};
+
+	const choiseT = (role: RoleType) => {
+		if (role === "user") return DrawerListUser;
+		if (role === "accounting") return DrawnerListAcc;
+		if (role === "admin") return DrawerList;
+	};
+
 	return (
 		<div>
 			<AppBar position="static">
@@ -114,9 +161,7 @@ const CHeader = () => {
 
 					<Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
 						Приветствую, вы авторизованы как {store.user.email}
-						<Typography>
-							Вы {store.user.role === "admin" ? "Администратор" : "Пользователь"}
-						</Typography>
+						<Typography>{choise(store.user.role)}</Typography>
 						<Typography>
 							{store.user.isActivated
 								? "подтвержденный аккаунт"
@@ -135,7 +180,7 @@ const CHeader = () => {
 				</Toolbar>
 			</AppBar>
 			<Drawer open={open} onClose={toggleDrawer(false)}>
-				{store.user.role === "admin" ? DrawerList : DrawerListUser}
+				{choiseT(store.user.role)}
 			</Drawer>
 		</div>
 	);

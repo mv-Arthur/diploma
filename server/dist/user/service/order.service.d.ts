@@ -9,13 +9,17 @@ import { Type } from "../model/type.model";
 import { OrderDto } from "../dto/order.dto";
 import { CreateTypeDto } from "../dto/createType.dto";
 import { PersonalDto } from "../dto/personalCreation.dto";
+import { Report } from "../model/report.model";
+import { DateU } from "../model/dateU.model";
 export declare class OrderService {
     private orderRepository;
     private userRepository;
     private fileRepository;
     private statusRepository;
     private typeRepository;
-    constructor(orderRepository: typeof Order, userRepository: typeof User, fileRepository: typeof File, statusRepository: typeof Status, typeRepository: typeof Type);
+    private reportRepository;
+    private dateURepository;
+    constructor(orderRepository: typeof Order, userRepository: typeof User, fileRepository: typeof File, statusRepository: typeof Status, typeRepository: typeof Type, reportRepository: typeof Report, dateURepository: typeof DateU);
     getExtension(filename: string): string | false;
     addOrder(userId: number, file: Express.Multer.File, dto: AddOrderDto): Promise<OrderDto>;
     getAlluser(): Promise<User[]>;
@@ -65,4 +69,10 @@ export declare class OrderService {
             imgName: string;
         })[];
     }[]>;
+    getAllByAcc(): Promise<any[]>;
+    getDate(): string;
+    setReport(): Promise<{
+        message: string;
+    }>;
+    getRevenue(): Promise<DateU[]>;
 }

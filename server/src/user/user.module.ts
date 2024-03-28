@@ -24,6 +24,8 @@ import { join } from "path";
 import { ExpressAdapter } from "@nestjs/platform-express";
 import { Personal } from "./model/personal.model";
 import { BotService } from "./service/bot.service";
+import { DateU } from "./model/dateU.model";
+import { Report } from "./model/report.model";
 @Module({
 	controllers: [UserController],
 	providers: [
@@ -50,6 +52,8 @@ import { BotService } from "./service/bot.service";
 			Subscription,
 			Keys,
 			Personal,
+			DateU,
+			Report,
 		]),
 		MulterModule.register({
 			dest: "./dist/user/uploads",

@@ -11,21 +11,26 @@ import { CreateTypeForm } from "../components/CreateTypeForm";
 import { TypesArea } from "../components/TypesArea";
 import Typography from "@mui/material/Typography";
 import { Office } from "../pages/office/Office";
+import { RoleType } from "../models/RoleType";
+import { AccountingPage } from "../pages/accounting/AccountingPage";
 const PrivateRoutes: React.FC = () => {
 	const { store } = useContext(Context);
 	React.useEffect(() => {
 		(async () => await store.checkAuth())();
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, []);
+
+	const choise = (role: RoleType) => {
+		if (role === "user") return <Route path={"/user"} element={<UserPage />} />;
+		if (role === "admin") return <Route path={"/user"} element={<AdminPage />} />;
+		if (role === "accounting") return <Route path={"/user"} element={<AccountingPage />} />;
+	};
+
 	return (
 		<div>
 			<CHeader />
 			<Routes>
-				{store.user.role === "user" ? (
-					<Route path={"/user"} element={<UserPage />} />
-				) : (
-					<Route path={"/user"} element={<AdminPage />} />
-				)}
+				{choise(store.user.role)}
 				<Route path={"/"} element={<LoginPage />} />
 				<Route path={"/office"} element={<Office />} />
 				{store.user.role === "admin" ? (

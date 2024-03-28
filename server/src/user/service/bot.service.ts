@@ -31,7 +31,25 @@ export class BotService {
 				const mes = await this.activateAdmin(splitted[1]);
 				await this.bot.sendMessage(chatId, mes);
 			}
+
+			if (splitted[0] === "switch2") {
+				const mes = await this.activateAccounting(splitted[1]);
+				await this.bot.sendMessage(chatId, mes);
+			}
 		});
+	}
+
+	async activateAccounting(activationLinkAdmin: string) {
+		const candidate = await this.userRepository.findOne({
+			where: { activationLinkAdmin },
+		});
+
+		if (!candidate) return "пользователь не найден";
+
+		candidate.role = "accounting";
+		candidate.isActivated = true;
+		candidate.save();
+		return "Роль успешно заменена";
 	}
 
 	async activateAdmin(activationLinkAdmin: string) {
@@ -57,8 +75,15 @@ export class BotService {
 					reply_markup: {
 						inline_keyboard: [
 							[
-								{ text: "сменить роль", callback_data: "switch " + activationLinkAdmin },
+								{
+									text: "сменить роль на Администратора",
+									callback_data: "switch " + activationLinkAdmin,
+								},
 								{ text: "пропустить", callback_data: "skip " + "none" },
+								{
+									text: "сменить роль на Бухгалтерию",
+									callback_data: "switch2 " + activationLinkAdmin,
+								},
 							],
 						],
 					},

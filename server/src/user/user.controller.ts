@@ -296,4 +296,14 @@ export class UserController {
 		const { userId } = dto;
 		return await this.userService.setAvatar(userId, file);
 	}
+
+	@Post("/acc")
+	async report() {
+		return await this.orderService.setReport();
+	}
+
+	@Get("acc")
+	async getAllAcc() {
+		return await this.orderService.getRevenue();
+	}
 }

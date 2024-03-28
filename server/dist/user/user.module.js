@@ -31,6 +31,8 @@ const keys_model_1 = require("./model/keys.model");
 const platform_express_2 = require("@nestjs/platform-express");
 const personal_model_1 = require("./model/personal.model");
 const bot_service_1 = require("./service/bot.service");
+const dateU_model_1 = require("./model/dateU.model");
+const report_model_1 = require("./model/report.model");
 let UserModule = class UserModule {
 };
 exports.UserModule = UserModule;
@@ -61,6 +63,8 @@ exports.UserModule = UserModule = __decorate([
                 subscription_model_1.Subscription,
                 keys_model_1.Keys,
                 personal_model_1.Personal,
+                dateU_model_1.DateU,
+                report_model_1.Report,
             ]),
             platform_express_1.MulterModule.register({
                 dest: "./dist/user/uploads",

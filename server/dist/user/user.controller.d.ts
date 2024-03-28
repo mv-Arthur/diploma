@@ -103,4 +103,8 @@ export declare class UserController {
     setPatronymic(dto: patronymicDto): Promise<string>;
     setPhoneNumber(dto: phoneNumberDto): Promise<string>;
     setAvatar(dto: AvatarDto, file: Express.Multer.File): Promise<string>;
+    report(): Promise<{
+        message: string;
+    }>;
+    getAllAcc(): Promise<import("./model/dateU.model").DateU[]>;
 }
