@@ -10,6 +10,8 @@ import { updateDescriptionDto } from "./dto/updateDescription.dto";
 import { CreateTypeDto } from "./dto/createType.dto";
 import { AvatarDto, nameDto, patronymicDto, phoneNumberDto, surnameDto } from "./dto/personalCreation.dto";
 import { BotService } from "./service/bot.service";
+import { SwtichRoleDto } from "./dto/switchRole.dto";
+import { MailToResetDto, ResetDto } from "./dto/reset.dto";
 export interface PushSubscription {
     endpoint: string;
     expirationTime?: number | null;
@@ -107,4 +109,12 @@ export declare class UserController {
         message: string;
     }>;
     getAllAcc(): Promise<import("./model/dateU.model").DateU[]>;
+    swtichRole(dto: SwtichRoleDto): Promise<{
+        message: string;
+    }>;
+    sendMailToReset(dto: MailToResetDto): Promise<void>;
+    redirectToClient(res: Response, link: string): void;
+    resetPass(link: string, dto: ResetDto): Promise<{
+        message: string;
+    }>;
 }

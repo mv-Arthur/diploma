@@ -38,17 +38,16 @@ let MailService = class MailService {
 				`,
         });
     }
-    async sendActivationAdminMail(to, link, userEmail) {
+    async recuperation(to, link) {
         await this.transporter.sendMail({
             from: process.env.SMPT_USER,
             to: to,
-            subject: `активация аккаунта для администратора на ${process.env.API_URL}`,
+            subject: `восстановление доступа к аккаунту на ${process.env.API_URL}`,
             text: "",
             html: `
 					<div>
-						<h1>Для активации роли для ${userEmail} перейдите по ссылке</h1>
+						<h1>для сброса пароля перейдите по ссылке</h1>
 						<a href="${link}">${link}</a>
-						<h2>ВНИМАНИЕ, если вы не планировали менять роль пользователя, проигнорируйте сообщение</h2>
 					</div>
 				`,
         });

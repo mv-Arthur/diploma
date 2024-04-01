@@ -32,6 +32,8 @@ export class User extends Model<User, CreationAttrs> {
 	activationLink: string;
 	@Column({ type: DataType.STRING, unique: false })
 	activationLinkAdmin: string;
+	@Column({ type: DataType.STRING, unique: false })
+	resetLink: string;
 	@Column({ type: DataType.STRING, defaultValue: "user" })
 	role: RoleType;
 	@HasOne(() => Token)

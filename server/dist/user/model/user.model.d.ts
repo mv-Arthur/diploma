@@ -18,6 +18,7 @@ export declare class User extends Model<User, CreationAttrs> {
     isActivated: boolean;
     activationLink: string;
     activationLinkAdmin: string;
+    resetLink: string;
     role: RoleType;
     token: Token;
     order: Order[];

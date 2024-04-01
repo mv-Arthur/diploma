@@ -159,6 +159,16 @@ let UserService = class UserService {
         admin.role = "admin";
         admin.save();
     }
+    async switchRole(id, role) {
+        const candidate = await this.userRepository.findOne({ where: { id } });
+        if (!candidate)
+            throw new common_1.HttpException("пользователь не найден", common_1.HttpStatus.BAD_REQUEST);
+        candidate.role = role;
+        await candidate.save();
+        return {
+            message: "Успех",
+        };
+    }
     async login(email, password) {
         const user = await this.userRepository.findOne({
             where: {
@@ -289,6 +299,35 @@ let UserService = class UserService {
         personal.avatar = fileName;
         personal.save();
         return personal.avatar;
+    }
+    async sendMailToReset(email) {
+        const candidate = await this.userRepository.findOne({
+            where: { email },
+        });
+        if (!candidate)
+            throw new common_1.HttpException("пользователь не найден", common_1.HttpStatus.BAD_REQUEST);
+        candidate.resetLink = (0, uuid_1.v4)();
+        await candidate.save();
+        await this.mailService.recuperation(email, `${process.env.API_URL}/user/reset/${candidate.resetLink}`);
+        return {
+            link: candidate.resetLink,
+        };
+    }
+    async resetPassword(link, newPassword) {
+        const user = await this.userRepository.findOne({
+            where: {
+                resetLink: link,
+            },
+        });
+        if (!user)
+            throw new common_1.HttpException("пользователь не найден", common_1.HttpStatus.BAD_REQUEST);
+        const passwordHash = await bcrypt.hash(newPassword, 3);
+        user.password = passwordHash;
+        user.resetLink = null;
+        await user.save();
+        const userDto = new user_dto_1.UserDto(user);
+        const tokens = this.tokenService.generateToken({ ...userDto });
+        await this.tokenService.saveToken(userDto.id, tokens.refreshToken);
     }
 };
 exports.UserService = UserService;

@@ -17,6 +17,7 @@ import { join } from "path";
 import { rename } from "fs";
 import { PersonalDto } from "../dto/personalCreation.dto";
 import { BotService } from "./bot.service";
+import { RoleType } from "../types/RoleType";
 @Injectable()
 export class UserService {
 	constructor(
@@ -175,6 +176,19 @@ export class UserService {
 		admin.save();
 	}
 
+	async switchRole(id: number, role: RoleType) {
+		const candidate = await this.userRepository.findOne({ where: { id } });
+
+		if (!candidate) throw new HttpException("пользователь не найден", HttpStatus.BAD_REQUEST);
+
+		candidate.role = role;
+		await candidate.save();
+
+		return {
+			message: "Успех",
+		};
+	}
+
 	async login(email: string, password: string) {
 		const user = await this.userRepository.findOne({
 			where: {
@@ -328,5 +342,45 @@ export class UserService {
 		personal.save();
 
 		return personal.avatar;
+	}
+
+	async sendMailToReset(email: string) {
+		const candidate = await this.userRepository.findOne({
+			where: { email },
+		});
+
+		if (!candidate) throw new HttpException("пользователь не найден", HttpStatus.BAD_REQUEST);
+
+		candidate.resetLink = uuidv4();
+		await candidate.save();
+
+		await this.mailService.recuperation(
+			email,
+			`${process.env.API_URL}/user/reset/${candidate.resetLink}`
+		);
+
+		return {
+			link: candidate.resetLink,
+		};
+	}
+
+	async resetPassword(link: string, newPassword: string) {
+		const user = await this.userRepository.findOne({
+			where: {
+				resetLink: link,
+			},
+		});
+
+		if (!user) throw new HttpException("пользователь не найден", HttpStatus.BAD_REQUEST);
+
+		const passwordHash = await bcrypt.hash(newPassword, 3);
+
+		user.password = passwordHash;
+		user.resetLink = null;
+		await user.save();
+
+		const userDto = new UserDto(user);
+		const tokens = this.tokenService.generateToken({ ...userDto });
+		await this.tokenService.saveToken(userDto.id, tokens.refreshToken);
 	}
 }

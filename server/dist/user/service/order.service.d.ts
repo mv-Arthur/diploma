@@ -11,6 +11,7 @@ import { CreateTypeDto } from "../dto/createType.dto";
 import { PersonalDto } from "../dto/personalCreation.dto";
 import { Report } from "../model/report.model";
 import { DateU } from "../model/dateU.model";
+import { Sequelize } from "sequelize-typescript";
 export declare class OrderService {
     private orderRepository;
     private userRepository;
@@ -19,7 +20,8 @@ export declare class OrderService {
     private typeRepository;
     private reportRepository;
     private dateURepository;
-    constructor(orderRepository: typeof Order, userRepository: typeof User, fileRepository: typeof File, statusRepository: typeof Status, typeRepository: typeof Type, reportRepository: typeof Report, dateURepository: typeof DateU);
+    private readonly sequelize;
+    constructor(orderRepository: typeof Order, userRepository: typeof User, fileRepository: typeof File, statusRepository: typeof Status, typeRepository: typeof Type, reportRepository: typeof Report, dateURepository: typeof DateU, sequelize: Sequelize);
     getExtension(filename: string): string | false;
     addOrder(userId: number, file: Express.Multer.File, dto: AddOrderDto): Promise<OrderDto>;
     getAlluser(): Promise<User[]>;

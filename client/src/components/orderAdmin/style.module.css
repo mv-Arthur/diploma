@@ -5,10 +5,13 @@
 }
 
 .left {
+	margin-top: 10px;
 	padding-top: 10px;
 	grid-area: left;
-	/* background-color: #f3f2f2; */
-	height: calc(100vh - 80px);
+	background-color: #f7f7f7;
+	height: calc(100vh - 100px);
+	border-radius: 10px;
+	padding-left: 10px;
 	/* z-index: -1; */
 }
 
@@ -16,13 +19,15 @@
 	margin-left: 10px;
 	grid-area: right;
 	display: flex;
-	margin-top: 10px;
 	flex-direction: column;
-
+	margin-top: 10px;
 	gap: 10px;
 
 	height: calc(100vh - 100px);
 	overflow-y: scroll;
+	background-color: #f7f7f7;
+	padding: 10px 10px;
+	border-radius: 10px;
 }
 
 .wrap {

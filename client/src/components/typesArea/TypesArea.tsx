@@ -1,12 +1,13 @@
 import Typography from "@mui/material/Typography";
 import { observer } from "mobx-react-lite";
-import { typeStore } from "../store/typeStore";
+import { typeStore } from "../../store/typeStore";
 import React from "react";
-import { API_URL } from "../http";
+import { API_URL } from "../../http";
 import Card from "@mui/material/Card";
 import CardContent from "@mui/material/CardContent";
 import CardMedia from "@mui/material/CardMedia";
 import { Button, CardActionArea, CardActions } from "@mui/material";
+import classes from "./typesArea.module.css";
 
 type AreaPropsType = {
 	user?: boolean;
@@ -59,7 +60,9 @@ export const TypesArea: React.FC<AreaPropsType> = observer((props) => {
 					);
 				})
 			) : (
-				<Typography>пока типов нет</Typography>
+				<div className={classes.imgBlock}>
+					<Typography>пока типов нет</Typography>
+				</div>
 			)}
 		</div>
 	);

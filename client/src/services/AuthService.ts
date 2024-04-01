@@ -20,6 +20,21 @@ export class AuthService {
 		return $api.post("/user/logout");
 	}
 
+	static async sendResetMail(email: string) {
+		return $api.post("/user/reset", {
+			email,
+		});
+	}
+
+	static async resetPass(
+		password: string,
+		link: string
+	): Promise<AxiosResponse<AddOrderResponse>> {
+		return $api.post(`user/reset/${link}`, {
+			newPassword: password,
+		});
+	}
+
 	static async getPublicKey(id: number): Promise<AxiosResponse<KeyResponse>> {
 		return $api.get(`/user/pushKey/${id}`);
 	}

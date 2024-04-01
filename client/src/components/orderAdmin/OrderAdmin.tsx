@@ -8,7 +8,8 @@ import classes from "./style.module.css";
 import Typography from "@mui/material/Typography";
 import { Context } from "../..";
 import defaultAvatar from "../../static/defaultAvatar.jpg";
-const selected = {
+import { Button } from "@mui/material";
+export const selected = {
 	height: "30px",
 	cursor: "pointer",
 	width: "calc(100% - 20px)",
@@ -19,7 +20,7 @@ const selected = {
 	color: "#fff",
 };
 
-const unselected = {
+export const unselected = {
 	height: "30px",
 	cursor: "pointer",
 	paddingLeft: "10px",
@@ -77,7 +78,7 @@ export const OrderAdmin = observer(() => {
 					if (user.id !== store.user.id) {
 						return (
 							<Typography
-								style={handleValid(user)}
+								style={{ ...unselected, ...handleValid(user) }}
 								key={user.id}
 								onClick={() => setCurrentUser(user)}
 							>
@@ -119,6 +120,30 @@ export const OrderAdmin = observer(() => {
 								Номер телефона{" "}
 								<span style={{ fontWeight: 900 }}>{currentUser.personal.phoneNumber}</span>
 							</Typography>
+							<div style={{ display: "flex", gap: "5px", marginTop: "10px" }}>
+								<Button
+									onClick={() =>
+										orderAdminStore.fetchToSelectRole("admin", currentUser.id)
+									}
+									variant={currentUser.role === "admin" ? "contained" : "outlined"}
+								>
+									Администратор
+								</Button>
+								<Button
+									onClick={() =>
+										orderAdminStore.fetchToSelectRole("accounting", currentUser.id)
+									}
+									variant={currentUser.role === "accounting" ? "contained" : "outlined"}
+								>
+									Бухгалтер
+								</Button>
+								<Button
+									onClick={() => orderAdminStore.fetchToSelectRole("user", currentUser.id)}
+									variant={currentUser.role === "user" ? "contained" : "outlined"}
+								>
+									Пользователь
+								</Button>
+							</div>
 						</div>
 					</div>
 				)}

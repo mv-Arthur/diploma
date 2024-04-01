@@ -28,6 +28,8 @@ const updateDescription_dto_1 = require("./dto/updateDescription.dto");
 const createType_dto_1 = require("./dto/createType.dto");
 const personalCreation_dto_1 = require("./dto/personalCreation.dto");
 const bot_service_1 = require("./service/bot.service");
+const switchRole_dto_1 = require("./dto/switchRole.dto");
+const reset_dto_1 = require("./dto/reset.dto");
 let UserController = class UserController {
     constructor(userService, orderService, botService) {
         this.userService = userService;
@@ -220,6 +222,24 @@ let UserController = class UserController {
     }
     async getAllAcc() {
         return await this.orderService.getRevenue();
+    }
+    async swtichRole(dto) {
+        const { role, id } = dto;
+        return await this.userService.switchRole(id, role);
+    }
+    async sendMailToReset(dto) {
+        const { email } = dto;
+        const data = await this.userService.sendMailToReset(email);
+    }
+    redirectToClient(res, link) {
+        res.redirect(`${process.env.CLIENT_URL}/reset/${link}`);
+    }
+    async resetPass(link, dto) {
+        const { newPassword } = dto;
+        await this.userService.resetPassword(link, newPassword);
+        return {
+            message: "Успех",
+        };
     }
 };
 exports.UserController = UserController;
@@ -437,6 +457,36 @@ __decorate([
     __metadata("design:paramtypes", []),
     __metadata("design:returntype", Promise)
 ], UserController.prototype, "getAllAcc", null);
+__decorate([
+    (0, common_1.Post)("/switchRole"),
+    __param(0, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [switchRole_dto_1.SwtichRoleDto]),
+    __metadata("design:returntype", Promise)
+], UserController.prototype, "swtichRole", null);
+__decorate([
+    (0, common_1.Post)("/reset"),
+    __param(0, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [reset_dto_1.MailToResetDto]),
+    __metadata("design:returntype", Promise)
+], UserController.prototype, "sendMailToReset", null);
+__decorate([
+    (0, common_1.Get)("/reset/:link"),
+    __param(0, (0, common_1.Res)()),
+    __param(1, (0, common_1.Param)("link")),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, String]),
+    __metadata("design:returntype", void 0)
+], UserController.prototype, "redirectToClient", null);
+__decorate([
+    (0, common_1.Post)("/reset/:link"),
+    __param(0, (0, common_1.Param)("link")),
+    __param(1, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, reset_dto_1.ResetDto]),
+    __metadata("design:returntype", Promise)
+], UserController.prototype, "resetPass", null);
 exports.UserController = UserController = __decorate([
     (0, common_1.Controller)("user"),
     __metadata("design:paramtypes", [user_service_1.UserService,

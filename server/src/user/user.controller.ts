@@ -36,6 +36,8 @@ import {
 	surnameDto,
 } from "./dto/personalCreation.dto";
 import { BotService } from "./service/bot.service";
+import { SwtichRoleDto } from "./dto/switchRole.dto";
+import { MailToResetDto, ResetDto } from "./dto/reset.dto";
 
 export interface PushSubscription {
 	endpoint: string;
@@ -305,5 +307,31 @@ export class UserController {
 	@Get("acc")
 	async getAllAcc() {
 		return await this.orderService.getRevenue();
+	}
+
+	@Post("/switchRole")
+	async swtichRole(@Body() dto: SwtichRoleDto) {
+		const { role, id } = dto;
+		return await this.userService.switchRole(id, role);
+	}
+
+	@Post("/reset")
+	async sendMailToReset(@Body() dto: MailToResetDto) {
+		const { email } = dto;
+		const data = await this.userService.sendMailToReset(email);
+	}
+
+	@Get("/reset/:link")
+	redirectToClient(@Res() res: Response, @Param("link") link: string) {
+		res.redirect(`${process.env.CLIENT_URL}/reset/${link}`);
+	}
+
+	@Post("/reset/:link")
+	async resetPass(@Param("link") link: string, @Body() dto: ResetDto) {
+		const { newPassword } = dto;
+		await this.userService.resetPassword(link, newPassword);
+		return {
+			message: "Успех",
+		};
 	}
 }

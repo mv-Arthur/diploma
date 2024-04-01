@@ -2,8 +2,8 @@ import React, { useContext } from "react";
 import { observer } from "mobx-react-lite";
 import { Context } from "..";
 import { typeStore } from "../store/typeStore";
-import { CreateOrderForm } from "../components/CreateOrderForm";
-import { OrderArea } from "../components/OrderArea";
+import { CreateOrderForm } from "../components/createOrderForm/CreateOrderForm";
+import { OrderArea } from "../components/orderArea/OrderArea";
 import { orderStore } from "../store/orderStore";
 import Container from "@mui/material/Container";
 

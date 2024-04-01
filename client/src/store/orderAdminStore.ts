@@ -1,6 +1,7 @@
 import { makeAutoObservable } from "mobx";
 import { GetAllOrdersResponse } from "../models/response/GetAllOrdersResponse";
 import { OrderAdminService } from "../services/OrderAdminService";
+import { RoleType } from "../models/RoleType";
 
 class OrderAdminStore {
 	ordersForUsers = [] as GetAllOrdersResponse[];
@@ -11,6 +12,20 @@ class OrderAdminStore {
 
 	addMany(orders: GetAllOrdersResponse[]) {
 		this.ordersForUsers = [...orders];
+	}
+
+	deleteFullfiled() {
+		for (let i = 0; i < this.ordersForUsers.length; i++) {
+			this.ordersForUsers[i].order = this.ordersForUsers[i].order.filter((order) => {
+				return order.status === "pending" || order.status === "job";
+			});
+		}
+	}
+
+	selectRole(role: RoleType, id: number) {
+		this.ordersForUsers.forEach((user) => {
+			if (user.id === id) user.role = role;
+		});
 	}
 
 	setStatus(id: number, status: string) {
@@ -37,6 +52,15 @@ class OrderAdminStore {
 		});
 	}
 
+	async fetchToSelectRole(role: RoleType, id: number) {
+		try {
+			const response = await OrderAdminService.switchRole(id, role);
+			this.selectRole(role, id);
+		} catch (err) {
+			console.log(err);
+		}
+	}
+
 	async fetchToSetStatus(id: number, status: string) {
 		try {
 			const response = await OrderAdminService.setStatus(id, status);
@@ -60,6 +84,15 @@ class OrderAdminStore {
 			const response = await OrderAdminService.getAllOrders();
 			this.addMany(response.data);
 			return response;
+		} catch (err) {
+			console.log(err);
+		}
+	}
+
+	async setReport() {
+		try {
+			await OrderAdminService.setReport();
+			this.deleteFullfiled();
 		} catch (err) {
 			console.log(err);
 		}

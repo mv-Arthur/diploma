@@ -21,6 +21,7 @@ import { Personal } from "../model/personal.model";
 import { PersonalDto } from "../dto/personalCreation.dto";
 import { Report } from "../model/report.model";
 import { DateU } from "../model/dateU.model";
+import { Sequelize } from "sequelize-typescript";
 @Injectable()
 export class OrderService {
 	constructor(
@@ -30,7 +31,8 @@ export class OrderService {
 		@InjectModel(Status) private statusRepository: typeof Status,
 		@InjectModel(Type) private typeRepository: typeof Type,
 		@InjectModel(Report) private reportRepository: typeof Report,
-		@InjectModel(DateU) private dateURepository: typeof DateU
+		@InjectModel(DateU) private dateURepository: typeof DateU,
+		private readonly sequelize: Sequelize
 	) {}
 
 	getExtension(filename: string) {
@@ -401,6 +403,21 @@ export class OrderService {
 		filtered.forEach((el) => {
 			res.push(...el);
 		});
+
+		const ordersToDelete = await this.orderRepository.findAll({
+			include: [
+				{
+					model: Status,
+					where: {
+						status: ["resolved", "rejected"],
+					},
+				},
+			],
+		});
+
+		for (const order of ordersToDelete) {
+			await order.destroy();
+		}
 
 		return res.filter((el) => el.status === "resolved" || el.status === "rejected");
 	}

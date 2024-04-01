@@ -3,7 +3,7 @@ import Select, { SelectChangeEvent } from "@mui/material/Select";
 import MenuItem from "@mui/material/MenuItem";
 import { observer } from "mobx-react-lite";
 import { typeStore } from "../store/typeStore";
-import { formItemStyle } from "./CreateOrderForm";
+import { formItemStyle } from "./createOrderForm/CreateOrderForm";
 export const SetTypeSelect = observer(() => {
 	const [type, setType] = React.useState("unqnown");
 

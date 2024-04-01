@@ -11,6 +11,7 @@ import { Personal } from "../model/personal.model";
 import { OrderService } from "./order.service";
 import { PersonalDto } from "../dto/personalCreation.dto";
 import { BotService } from "./bot.service";
+import { RoleType } from "../types/RoleType";
 export declare class UserService {
     private userRepository;
     private mailService;
@@ -35,6 +36,9 @@ export declare class UserService {
     getPushKey(id: number): Promise<string>;
     activate(activationLink: string): Promise<void>;
     activateAdmin(activationLinkAdmin: string): Promise<void>;
+    switchRole(id: number, role: RoleType): Promise<{
+        message: string;
+    }>;
     login(email: string, password: string): Promise<{
         user: UserDto;
         personal: PersonalDto;
@@ -53,4 +57,8 @@ export declare class UserService {
     setPatronymic(userId: number, patronymic: string): Promise<string>;
     phoneNumber(userId: number, phoneNumber: string): Promise<string>;
     setAvatar(userId: number, file: Express.Multer.File): Promise<string>;
+    sendMailToReset(email: string): Promise<{
+        link: string;
+    }>;
+    resetPassword(link: string, newPassword: string): Promise<void>;
 }

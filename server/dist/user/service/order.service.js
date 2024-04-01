@@ -32,8 +32,9 @@ const personal_model_1 = require("../model/personal.model");
 const personalCreation_dto_1 = require("../dto/personalCreation.dto");
 const report_model_1 = require("../model/report.model");
 const dateU_model_1 = require("../model/dateU.model");
+const sequelize_typescript_1 = require("sequelize-typescript");
 let OrderService = class OrderService {
-    constructor(orderRepository, userRepository, fileRepository, statusRepository, typeRepository, reportRepository, dateURepository) {
+    constructor(orderRepository, userRepository, fileRepository, statusRepository, typeRepository, reportRepository, dateURepository, sequelize) {
         this.orderRepository = orderRepository;
         this.userRepository = userRepository;
         this.fileRepository = fileRepository;
@@ -41,6 +42,7 @@ let OrderService = class OrderService {
         this.typeRepository = typeRepository;
         this.reportRepository = reportRepository;
         this.dateURepository = dateURepository;
+        this.sequelize = sequelize;
     }
     getExtension(filename) {
         const match = /\.([0-9a-z]+)$/i.exec(filename);
@@ -357,6 +359,19 @@ let OrderService = class OrderService {
         filtered.forEach((el) => {
             res.push(...el);
         });
+        const ordersToDelete = await this.orderRepository.findAll({
+            include: [
+                {
+                    model: status_model_1.Status,
+                    where: {
+                        status: ["resolved", "rejected"],
+                    },
+                },
+            ],
+        });
+        for (const order of ordersToDelete) {
+            await order.destroy();
+        }
         return res.filter((el) => el.status === "resolved" || el.status === "rejected");
     }
     getDate() {
@@ -415,6 +430,6 @@ exports.OrderService = OrderService = __decorate([
     __param(4, (0, sequelize_1.InjectModel)(type_model_1.Type)),
     __param(5, (0, sequelize_1.InjectModel)(report_model_1.Report)),
     __param(6, (0, sequelize_1.InjectModel)(dateU_model_1.DateU)),
-    __metadata("design:paramtypes", [Object, Object, Object, Object, Object, Object, Object])
+    __metadata("design:paramtypes", [Object, Object, Object, Object, Object, Object, Object, sequelize_typescript_1.Sequelize])
 ], OrderService);
 //# sourceMappingURL=order.service.js.map
