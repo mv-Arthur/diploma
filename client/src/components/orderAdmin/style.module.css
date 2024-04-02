@@ -59,3 +59,14 @@
 .personalRight {
 	grid-area: r;
 }
+
+.imgBlock {
+	margin: 0 auto;
+	display: flex;
+	align-items: center;
+}
+
+.imgBlock img {
+	width: 400px;
+	height: 400px;
+}

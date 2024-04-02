@@ -2,6 +2,7 @@ import { makeAutoObservable } from "mobx";
 import { GetAllOrdersResponse } from "../models/response/GetAllOrdersResponse";
 import { OrderAdminService } from "../services/OrderAdminService";
 import { RoleType } from "../models/RoleType";
+import { Order } from "../models/IOrder";
 
 class OrderAdminStore {
 	ordersForUsers = [] as GetAllOrdersResponse[];
@@ -15,11 +16,14 @@ class OrderAdminStore {
 	}
 
 	deleteFullfiled() {
-		for (let i = 0; i < this.ordersForUsers.length; i++) {
-			this.ordersForUsers[i].order = this.ordersForUsers[i].order.filter((order) => {
-				return order.status === "pending" || order.status === "job";
-			});
-		}
+		this.ordersForUsers = this.ordersForUsers.map((user) => {
+			return {
+				...user,
+				order: user.order.filter((order) => {
+					return order.status === "pending" || order.status === "job";
+				}),
+			};
+		});
 	}
 
 	selectRole(role: RoleType, id: number) {

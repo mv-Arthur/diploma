@@ -9,6 +9,12 @@ import Typography from "@mui/material/Typography";
 import { Context } from "../..";
 import defaultAvatar from "../../static/defaultAvatar.jpg";
 import { Button } from "@mui/material";
+import nothinkImg from "../../static/nothinkAdmin.png";
+import userImg from "../../static/unauthtorizeImg.png";
+import ArticleIcon from "@mui/icons-material/Article";
+import Box from "@mui/material/Box";
+import Modal from "@mui/material/Modal";
+import { UserArea } from "../userArea/UserArea";
 export const selected = {
 	height: "30px",
 	cursor: "pointer",
@@ -27,6 +33,18 @@ export const unselected = {
 	width: "calc(100% - 20px)",
 };
 
+const style = {
+	position: "absolute" as "absolute",
+	top: "50%",
+	left: "50%",
+	transform: "translate(-50%, -50%)",
+	width: 400,
+	height: 300,
+	bgcolor: "background.paper",
+	boxShadow: 24,
+	p: 4,
+};
+
 const findFirst = (arr: GetAllOrdersResponse[]) => {
 	for (let i = 0; i < arr.length; i++) {
 		if (arr[i].role === "user") {
@@ -36,7 +54,11 @@ const findFirst = (arr: GetAllOrdersResponse[]) => {
 };
 
 export const OrderAdmin = observer(() => {
+	const [open, setOpen] = React.useState(false);
+	const handleOpen = () => setOpen(true);
+	const handleClose = () => setOpen(false);
 	const [currentUser, setCurrentUser] = React.useState<GetAllOrdersResponse>();
+
 	const { store } = useContext(Context);
 	React.useEffect(() => {
 		(async () => {
@@ -70,103 +92,80 @@ export const OrderAdmin = observer(() => {
 			else return unselected;
 		}
 	};
-	console.log(currentUser);
+	console.log(orderAdminStore.ordersForUsers);
 	return (
-		<div className={classes.area}>
-			<div className={classes.left}>
-				{orderAdminStore.ordersForUsers.map((user) => {
-					if (user.id !== store.user.id) {
-						return (
-							<Typography
-								style={{ ...unselected, ...handleValid(user) }}
-								key={user.id}
-								onClick={() => setCurrentUser(user)}
-							>
-								{user.email}
-							</Typography>
-						);
-					} else {
-						return null;
-					}
-				})}
-			</div>
-
-			<div className={classes.right}>
-				{currentUser && (
-					<div className={classes.personal}>
-						<div className={classes.personalLeft}>
-							<img
-								src={
-									currentUser.personal.avatar
-										? `${API_URL}/uploads/${currentUser.personal.avatar}`
-										: defaultAvatar
-								}
-								alt="avatar"
-							/>
-						</div>
-						<div className={classes.personalRight}>
-							<Typography>
-								Фамилия{" "}
-								<span style={{ fontWeight: 900 }}>{currentUser.personal.surname}</span>
-							</Typography>
-							<Typography>
-								Имя <span style={{ fontWeight: 900 }}>{currentUser.personal.name}</span>
-							</Typography>
-							<Typography>
-								Отчество{" "}
-								<span style={{ fontWeight: 900 }}>{currentUser.personal.patronymic}</span>
-							</Typography>
-							<Typography>
-								Номер телефона{" "}
-								<span style={{ fontWeight: 900 }}>{currentUser.personal.phoneNumber}</span>
-							</Typography>
-							<div style={{ display: "flex", gap: "5px", marginTop: "10px" }}>
-								<Button
-									onClick={() =>
-										orderAdminStore.fetchToSelectRole("admin", currentUser.id)
-									}
-									variant={currentUser.role === "admin" ? "contained" : "outlined"}
+		<>
+			<div className={classes.area}>
+				<div className={classes.left}>
+					{orderAdminStore.ordersForUsers.map((user) => {
+						if (user.id !== store.user.id) {
+							return (
+								<Typography
+									style={{ ...unselected, ...handleValid(user) }}
+									key={user.id}
+									onClick={() => setCurrentUser(user)}
 								>
-									Администратор
-								</Button>
-								<Button
-									onClick={() =>
-										orderAdminStore.fetchToSelectRole("accounting", currentUser.id)
-									}
-									variant={currentUser.role === "accounting" ? "contained" : "outlined"}
-								>
-									Бухгалтер
-								</Button>
-								<Button
-									onClick={() => orderAdminStore.fetchToSelectRole("user", currentUser.id)}
-									variant={currentUser.role === "user" ? "contained" : "outlined"}
-								>
-									Пользователь
-								</Button>
-							</div>
-						</div>
-					</div>
-				)}
-				<div className={classes.wrap}>
-					{currentUser && currentUser.order.length ? (
-						currentUser.order.map((order) => {
-							return order.type ? (
-								<OrderComponent
-									editble
-									key={order.id}
-									order={order}
-									handleDownload={handleDownload}
-									handleGet={handleGet}
-								/>
-							) : (
-								<div key={order.id}>не поддерживаемый тип</div>
+									{user.email}
+								</Typography>
 							);
-						})
-					) : (
-						<div>заявок нет</div>
-					)}
+						} else {
+							return null;
+						}
+					})}
+				</div>
+				<button onClick={async () => await orderAdminStore.fetchingOrders()}>awdwada</button>
+				<div className={classes.right}>
+					<UserArea
+						currentUser={currentUser}
+						handleDownload={handleDownload}
+						handleGet={handleGet}
+					/>
 				</div>
 			</div>
-		</div>
+
+			<Button
+				onClick={handleOpen}
+				variant="outlined"
+				style={{ position: "fixed", right: 100, bottom: 50 }}
+			>
+				Отправить отчет <ArticleIcon style={{ marginLeft: "5px" }} />
+			</Button>
+			<Modal
+				open={open}
+				onClose={handleClose}
+				aria-labelledby="modal-modal-title"
+				aria-describedby="modal-modal-description"
+			>
+				<Box sx={style}>
+					<Typography id="modal-modal-title" variant="h6" component="h2">
+						Отправка отчета
+					</Typography>
+					<Typography id="modal-modal-description" sx={{ mt: 2 }}>
+						ВНИМАНИЕ! все заявки со статусом "готово к выдаче" и "отклонено" будут удалены из
+						вашей рабочей области и отправлены в бухгалтерию, уверены что хотите продолжить?
+					</Typography>
+					<div style={{ position: "absolute", bottom: 20, right: 20 }}>
+						<Button
+							onClick={async () => {
+								await orderAdminStore.setReport();
+
+								setCurrentUser((currentUser) => {
+									if (currentUser) {
+										const founded = orderAdminStore.ordersForUsers.find((user) => {
+											return user.id === currentUser.id;
+										});
+										if (founded) return founded;
+									}
+								});
+								handleClose();
+							}}
+						>
+							да
+						</Button>
+						<Button onClick={handleClose}>нет</Button>
+					</div>
+				</Box>
+			</Modal>
+		</>
 	);
 });

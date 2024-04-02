@@ -8,7 +8,7 @@ import CardContent from "@mui/material/CardContent";
 import CardMedia from "@mui/material/CardMedia";
 import { Button, CardActionArea, CardActions } from "@mui/material";
 import classes from "./typesArea.module.css";
-
+import nothinkImg from "../../static/nothinkTypes.png";
 type AreaPropsType = {
 	user?: boolean;
 };
@@ -61,7 +61,10 @@ export const TypesArea: React.FC<AreaPropsType> = observer((props) => {
 				})
 			) : (
 				<div className={classes.imgBlock}>
-					<Typography>пока типов нет</Typography>
+					<Typography style={{ fontWeight: 100 }} variant="h4">
+						Пока поддерживаемых услуг нет
+					</Typography>
+					<img src={nothinkImg} alt="" />
 				</div>
 			)}
 		</div>

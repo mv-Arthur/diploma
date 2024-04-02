@@ -17,32 +17,34 @@ export const OrderArea = observer(() => {
 	};
 	console.log(orderStore.orders);
 	return (
-		<div
-			style={{
-				display: "flex",
-				gap: 10,
-				flexWrap: "wrap",
-				marginTop: 20,
-				width: "100%",
-				backgroundColor: "#F7F7F7",
-				padding: "10px",
-				borderRadius: "10px",
-			}}
-		>
-			{orderStore.orders.length ? (
-				orderStore.orders.map((order) => {
-					return (
-						<OrderComponent key={order.id} order={order} handleDownload={handleDownload} />
-					);
-				})
-			) : (
-				<div className={classes.imgBlock}>
-					<Typography style={{ fontWeight: 100 }} variant="h3">
-						Пока заявок нет{"("}
-					</Typography>
-					<img src={nothinkImg} alt="" />
-				</div>
-			)}
-		</div>
+		<>
+			<div
+				style={{
+					display: "flex",
+					gap: 10,
+					flexWrap: "wrap",
+					marginTop: 20,
+					width: "100%",
+					backgroundColor: "#F7F7F7",
+					padding: "10px",
+					borderRadius: "10px",
+				}}
+			>
+				{orderStore.orders.length ? (
+					orderStore.orders.map((order) => {
+						return (
+							<OrderComponent key={order.id} order={order} handleDownload={handleDownload} />
+						);
+					})
+				) : (
+					<div className={classes.imgBlock}>
+						<Typography style={{ fontWeight: 100 }} variant="h3">
+							Пока заявок нет{"("}
+						</Typography>
+						<img src={nothinkImg} alt="" />
+					</div>
+				)}
+			</div>
+		</>
 	);
 });
