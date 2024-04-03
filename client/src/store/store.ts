@@ -4,7 +4,16 @@ import { AuthService } from "../services/AuthService";
 import axios from "axios";
 import { AuthResponse, Personal } from "../models/response/AuthResponse";
 import { API_URL } from "../http";
-
+const CookiesDelete = () => {
+	var cookies = document.cookie.split(";");
+	for (var i = 0; i < cookies.length; i++) {
+		var cookie = cookies[i];
+		var eqPos = cookie.indexOf("=");
+		var name = eqPos > -1 ? cookie.substr(0, eqPos) : cookie;
+		document.cookie = name + "=;expires=Thu, 01 Jan 1970 00:00:00 GMT;";
+		document.cookie = name + "=; path=/; expires=Thu, 01 Jan 1970 00:00:01 GMT;";
+	}
+};
 export default class Store {
 	user = {} as IUser;
 	isAuth = false;
@@ -96,18 +105,19 @@ export default class Store {
 					.then(async function (registration) {
 						if (keyRes.data.publicKey) {
 							const pushServerPublicKey = keyRes.data.publicKey;
-							// subscribe and return the subscription
+
 							const subscription = await registration.pushManager.subscribe({
 								userVisibleOnly: true,
 								applicationServerKey: pushServerPublicKey,
 							});
 							console.log(subscription);
 							try {
-								const resq = await AuthService.resubscribe(
-									subscription,
-									response.data.user.id
-								);
-								console.log(resq);
+								if (response.data.user.id) {
+									const resq = await AuthService.resubscribe(
+										subscription,
+										response.data.user.id
+									);
+								}
 							} catch (err) {
 								console.log(err);
 							}
@@ -118,9 +128,15 @@ export default class Store {
 					});
 			}
 
-			return true;
+			return {
+				status: true,
+				message: "ok",
+			};
 		} catch (err: any) {
-			console.log(err?.response?.data);
+			return {
+				status: false,
+				message: err.response.data.length ? err.response.data[0] : err.response.data.message,
+			};
 		}
 	}
 
@@ -139,7 +155,7 @@ export default class Store {
 					.then(async function (registration) {
 						if (keyRes.data.publicKey) {
 							const pushServerPublicKey = keyRes.data.publicKey;
-							// subscribe and return the subscription
+
 							const subscription = await registration.pushManager.subscribe({
 								userVisibleOnly: true,
 								applicationServerKey: pushServerPublicKey,
@@ -160,9 +176,16 @@ export default class Store {
 						console.log(err);
 					});
 			}
-			return true;
+			return {
+				status: true,
+				message: "ok",
+			};
 		} catch (err: any) {
 			console.log(err?.response?.data);
+			return {
+				status: false,
+				message: err.response.data.length ? err.response.data[0] : err.response.data.message,
+			};
 		}
 	}
 
@@ -184,6 +207,8 @@ export default class Store {
 			this.setAuth(false);
 			this.setUser({} as IUser);
 			this.setPersonal({} as Personal);
+
+			CookiesDelete();
 		} catch (err: any) {
 			console.log(err?.response?.data);
 		}

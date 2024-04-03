@@ -15,6 +15,7 @@ import ArticleIcon from "@mui/icons-material/Article";
 import Box from "@mui/material/Box";
 import Modal from "@mui/material/Modal";
 import { UserArea } from "../userArea/UserArea";
+import { useSnackbar, VariantType } from "notistack";
 export const selected = {
 	height: "30px",
 	cursor: "pointer",
@@ -53,7 +54,23 @@ const findFirst = (arr: GetAllOrdersResponse[]) => {
 	}
 };
 
+const findFullfiled = (ordersForUsers: GetAllOrdersResponse[]) => {
+	for (let i = 0; i < ordersForUsers.length; i++) {
+		for (let j = 0; j < ordersForUsers[i].order.length; j++) {
+			if (
+				ordersForUsers[i].order[j].status === "resolved" ||
+				ordersForUsers[i].order[j].status === "rejected"
+			) {
+				return true;
+			}
+		}
+	}
+
+	return false;
+};
+
 export const OrderAdmin = observer(() => {
+	const { enqueueSnackbar } = useSnackbar();
 	const [open, setOpen] = React.useState(false);
 	const handleOpen = () => setOpen(true);
 	const handleClose = () => setOpen(false);
@@ -72,7 +89,9 @@ export const OrderAdmin = observer(() => {
 			}
 		})();
 	}, []);
-
+	const setSnackBartoQueue = (variant: VariantType, message: string) => () => {
+		enqueueSnackbar(message, { variant });
+	};
 	const handleDownload = (id: number) => {
 		window.location.href = `${API_URL}/user/download/${id}`;
 	};
@@ -81,6 +100,16 @@ export const OrderAdmin = observer(() => {
 		try {
 			await orderAdminStore.fetchToSetStatus(id, status);
 			await orderAdminStore.fetchToSetPrice(id, price);
+			setCurrentUser((currentUser) => {
+				return (
+					currentUser && {
+						...currentUser,
+						order: currentUser.order.map((order) =>
+							order.id === id ? { ...order, price: price, status: status } : order
+						),
+					}
+				);
+			});
 		} catch (err) {
 			console.log(err);
 		}
@@ -92,7 +121,7 @@ export const OrderAdmin = observer(() => {
 			else return unselected;
 		}
 	};
-	console.log(orderAdminStore.ordersForUsers);
+
 	return (
 		<>
 			<div className={classes.area}>
@@ -113,7 +142,7 @@ export const OrderAdmin = observer(() => {
 						}
 					})}
 				</div>
-				<button onClick={async () => await orderAdminStore.fetchingOrders()}>awdwada</button>
+
 				<div className={classes.right}>
 					<UserArea
 						currentUser={currentUser}
@@ -123,49 +152,60 @@ export const OrderAdmin = observer(() => {
 				</div>
 			</div>
 
-			<Button
-				onClick={handleOpen}
-				variant="outlined"
-				style={{ position: "fixed", right: 100, bottom: 50 }}
-			>
-				Отправить отчет <ArticleIcon style={{ marginLeft: "5px" }} />
-			</Button>
-			<Modal
-				open={open}
-				onClose={handleClose}
-				aria-labelledby="modal-modal-title"
-				aria-describedby="modal-modal-description"
-			>
-				<Box sx={style}>
-					<Typography id="modal-modal-title" variant="h6" component="h2">
-						Отправка отчета
-					</Typography>
-					<Typography id="modal-modal-description" sx={{ mt: 2 }}>
-						ВНИМАНИЕ! все заявки со статусом "готово к выдаче" и "отклонено" будут удалены из
-						вашей рабочей области и отправлены в бухгалтерию, уверены что хотите продолжить?
-					</Typography>
-					<div style={{ position: "absolute", bottom: 20, right: 20 }}>
-						<Button
-							onClick={async () => {
-								await orderAdminStore.setReport();
+			<>
+				<Button
+					onClick={handleOpen}
+					variant="outlined"
+					style={{ position: "fixed", right: 100, bottom: 50 }}
+				>
+					Отправить отчет <ArticleIcon style={{ marginLeft: "5px" }} />
+				</Button>
+				<Modal
+					open={open}
+					onClose={handleClose}
+					aria-labelledby="modal-modal-title"
+					aria-describedby="modal-modal-description"
+				>
+					<Box sx={style}>
+						<Typography id="modal-modal-title" variant="h6" component="h2">
+							Отправка отчета
+						</Typography>
+						<Typography id="modal-modal-description" sx={{ mt: 2 }}>
+							ВНИМАНИЕ! все заявки со статусом "готово к выдаче" и "отклонено" будут удалены
+							из вашей рабочей области и отправлены в бухгалтерию, уверены что хотите
+							продолжить?
+						</Typography>
+						<div style={{ position: "absolute", bottom: 20, right: 20 }}>
+							<Button
+								onClick={async () => {
+									if (findFullfiled(orderAdminStore.ordersForUsers)) {
+										await orderAdminStore.setReport();
 
-								setCurrentUser((currentUser) => {
-									if (currentUser) {
-										const founded = orderAdminStore.ordersForUsers.find((user) => {
-											return user.id === currentUser.id;
+										setCurrentUser((currentUser) => {
+											if (currentUser) {
+												const founded = orderAdminStore.ordersForUsers.find((user) => {
+													return user.id === currentUser.id;
+												});
+												if (founded) return founded;
+											}
 										});
-										if (founded) return founded;
+										handleClose();
+										setSnackBartoQueue("success", "отчет успешно отправлен")();
+									} else {
+										setSnackBartoQueue(
+											"error",
+											"нет выполненных или отклоненных заявок"
+										)();
 									}
-								});
-								handleClose();
-							}}
-						>
-							да
-						</Button>
-						<Button onClick={handleClose}>нет</Button>
-					</div>
-				</Box>
-			</Modal>
+								}}
+							>
+								да
+							</Button>
+							<Button onClick={handleClose}>нет</Button>
+						</div>
+					</Box>
+				</Modal>
+			</>
 		</>
 	);
 });

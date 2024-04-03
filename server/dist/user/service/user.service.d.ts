@@ -12,6 +12,8 @@ import { OrderService } from "./order.service";
 import { PersonalDto } from "../dto/personalCreation.dto";
 import { BotService } from "./bot.service";
 import { RoleType } from "../types/RoleType";
+import { Organization } from "../model/organisation.model";
+import { ExtendedOrgDto, OrganizationDto } from "../dto/organization.dto";
 export declare class UserService {
     private userRepository;
     private mailService;
@@ -21,8 +23,9 @@ export declare class UserService {
     private keysRepository;
     private subsciptionRepository;
     private personalRepository;
+    private organisationRepository;
     private botService;
-    constructor(userRepository: typeof User, mailService: MailService, tokenService: TokenService, orderService: OrderService, vapidRepository: typeof Vapid, keysRepository: typeof Keys, subsciptionRepository: typeof Subscription, personalRepository: typeof Personal, botService: BotService);
+    constructor(userRepository: typeof User, mailService: MailService, tokenService: TokenService, orderService: OrderService, vapidRepository: typeof Vapid, keysRepository: typeof Keys, subsciptionRepository: typeof Subscription, personalRepository: typeof Personal, organisationRepository: typeof Organization, botService: BotService);
     _: void;
     registration(email: string, password: string): Promise<{
         user: UserDto;
@@ -61,4 +64,8 @@ export declare class UserService {
         link: string;
     }>;
     resetPassword(link: string, newPassword: string): Promise<void>;
+    setOrganization(dto: OrganizationDto): Promise<void>;
+    editOrganization(dto: ExtendedOrgDto): Promise<Organization>;
+    setAvatarOrg(id: number, file: Express.Multer.File): Promise<string>;
+    getOrg(id: number): Promise<Organization>;
 }

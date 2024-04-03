@@ -13,10 +13,15 @@ import Typography from "@mui/material/Typography";
 import { Office } from "../pages/office/Office";
 import { RoleType } from "../models/RoleType";
 import { AccountingPage } from "../pages/accounting/AccountingPage";
+import { Organization } from "../pages/organization/Organization";
+import { typeStore } from "../store/typeStore";
 const PrivateRoutes: React.FC = () => {
 	const { store } = useContext(Context);
 	React.useEffect(() => {
-		(async () => await store.checkAuth())();
+		(async () => {
+			await store.checkAuth();
+			await typeStore.fetchTypes();
+		})();
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, []);
 
@@ -33,6 +38,7 @@ const PrivateRoutes: React.FC = () => {
 				{choise(store.user.role)}
 				<Route path={"/"} element={<LoginPage />} />
 				<Route path={"/office"} element={<Office />} />
+				<Route path="/organization" element={<Organization role={store.user.role} />} />
 				{store.user.role === "admin" ? (
 					<Route
 						path={"/types"}

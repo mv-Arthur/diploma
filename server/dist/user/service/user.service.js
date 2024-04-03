@@ -31,8 +31,9 @@ const path_1 = require("path");
 const fs_1 = require("fs");
 const personalCreation_dto_1 = require("../dto/personalCreation.dto");
 const bot_service_1 = require("./bot.service");
+const organisation_model_1 = require("../model/organisation.model");
 let UserService = class UserService {
-    constructor(userRepository, mailService, tokenService, orderService, vapidRepository, keysRepository, subsciptionRepository, personalRepository, botService) {
+    constructor(userRepository, mailService, tokenService, orderService, vapidRepository, keysRepository, subsciptionRepository, personalRepository, organisationRepository, botService) {
         this.userRepository = userRepository;
         this.mailService = mailService;
         this.tokenService = tokenService;
@@ -41,6 +42,7 @@ let UserService = class UserService {
         this.keysRepository = keysRepository;
         this.subsciptionRepository = subsciptionRepository;
         this.personalRepository = personalRepository;
+        this.organisationRepository = organisationRepository;
         this.botService = botService;
         this._ = this.botService.start();
     }
@@ -103,6 +105,8 @@ let UserService = class UserService {
                 userId: id,
             },
         });
+        if (!subscription)
+            throw new common_1.HttpException("подписка не найдена", common_1.HttpStatus.BAD_REQUEST);
         const keys = await this.keysRepository.findOne({
             where: {
                 subscriptionId: subscription.id,
@@ -164,6 +168,9 @@ let UserService = class UserService {
         if (!candidate)
             throw new common_1.HttpException("пользователь не найден", common_1.HttpStatus.BAD_REQUEST);
         candidate.role = role;
+        if (role === "admin" || role === "accounting") {
+            candidate.isActivated = true;
+        }
         await candidate.save();
         return {
             message: "Успех",
@@ -329,6 +336,49 @@ let UserService = class UserService {
         const tokens = this.tokenService.generateToken({ ...userDto });
         await this.tokenService.saveToken(userDto.id, tokens.refreshToken);
     }
+    async setOrganization(dto) {
+        await this.organisationRepository.create({ ...dto });
+    }
+    async editOrganization(dto) {
+        const org = await this.organisationRepository.findOne({ where: { id: dto.id } });
+        if (!org)
+            throw new common_1.HttpException("данные не найдены", common_1.HttpStatus.BAD_REQUEST);
+        org.email = dto.email;
+        org.phoneNumber = dto.phoneNumber;
+        org.accNumber = dto.accNumber;
+        org.address = dto.address;
+        org.description = dto.description;
+        await org.save();
+        return org;
+    }
+    async setAvatarOrg(id, file) {
+        const extention = this.orderService.getExtension(file.originalname);
+        const fileName = (0, uuid_1.v4)() + `.${extention}`;
+        const filePath = (0, path_1.join)(__dirname, "..", "uploads", fileName);
+        if (extention) {
+            (0, fs_1.rename)(file.path, filePath, (err) => {
+                if (err) {
+                    console.error(err);
+                    throw new common_1.HttpException("ошибка при чтении файла", common_1.HttpStatus.BAD_REQUEST);
+                }
+                console.log(`переименован успешно`);
+            });
+        }
+        const org = await this.organisationRepository.findOne({
+            where: { id: id },
+        });
+        if (!org)
+            throw new common_1.HttpException("данные не найдены", common_1.HttpStatus.BAD_REQUEST);
+        org.avatar = fileName;
+        await org.save();
+        return fileName;
+    }
+    async getOrg(id) {
+        const org = await this.organisationRepository.findOne({ where: { id } });
+        if (!org)
+            throw new common_1.HttpException("данные не найдены", common_1.HttpStatus.BAD_REQUEST);
+        return org;
+    }
 };
 exports.UserService = UserService;
 exports.UserService = UserService = __decorate([
@@ -338,8 +388,9 @@ exports.UserService = UserService = __decorate([
     __param(5, (0, sequelize_1.InjectModel)(keys_model_1.Keys)),
     __param(6, (0, sequelize_1.InjectModel)(subscription_model_1.Subscription)),
     __param(7, (0, sequelize_1.InjectModel)(personal_model_1.Personal)),
+    __param(8, (0, sequelize_1.InjectModel)(organisation_model_1.Organization)),
     __metadata("design:paramtypes", [Object, mail_service_1.MailService,
         token_service_1.TokenService,
-        order_service_1.OrderService, Object, Object, Object, Object, bot_service_1.BotService])
+        order_service_1.OrderService, Object, Object, Object, Object, Object, bot_service_1.BotService])
 ], UserService);
 //# sourceMappingURL=user.service.js.map

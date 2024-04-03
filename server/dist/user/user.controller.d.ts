@@ -12,6 +12,7 @@ import { AvatarDto, nameDto, patronymicDto, phoneNumberDto, surnameDto } from ".
 import { BotService } from "./service/bot.service";
 import { SwtichRoleDto } from "./dto/switchRole.dto";
 import { MailToResetDto, ResetDto } from "./dto/reset.dto";
+import { ExtendedOrgDto, IdDto, OrganizationDto } from "./dto/organization.dto";
 export interface PushSubscription {
     endpoint: string;
     expirationTime?: number | null;
@@ -25,6 +26,7 @@ export declare class UserController {
     private orderService;
     private botService;
     constructor(userService: UserService, orderService: OrderService, botService: BotService);
+    _: Promise<void>;
     registration(dto: RegistrationDto, res: Response): Promise<Response<any, Record<string, any>>>;
     subscription(req: Request, res: Response): Promise<{
         message: string;
@@ -117,4 +119,10 @@ export declare class UserController {
     resetPass(link: string, dto: ResetDto): Promise<{
         message: string;
     }>;
+    setOrganization(dto: OrganizationDto): Promise<{
+        message: string;
+    }>;
+    editOrganization(dto: ExtendedOrgDto): Promise<import("./model/organisation.model").Organization>;
+    getOrg(id: number): Promise<import("./model/organisation.model").Organization>;
+    setAvatarOrg(dto: IdDto, file: Express.Multer.File): Promise<string>;
 }

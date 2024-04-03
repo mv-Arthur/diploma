@@ -10,6 +10,7 @@ import AppBar from "@mui/material/AppBar";
 import Modal from "@mui/material/Modal";
 import Box from "@mui/material/Box";
 import { AuthService } from "../services/AuthService";
+import { useSnackbar, VariantType } from "notistack";
 const style = {
 	position: "absolute" as "absolute",
 	top: "50%",
@@ -30,7 +31,10 @@ export const LoginPage = () => {
 	const [open, setOpen] = React.useState(false);
 	const [next, setNext] = React.useState(false);
 	const [recuperation, setRecuperation] = React.useState("");
-
+	const { enqueueSnackbar } = useSnackbar();
+	const setSnackBartoQueue = (variant: VariantType, message: string) => () => {
+		enqueueSnackbar(message, { variant });
+	};
 	const navigate = useNavigate();
 
 	const handleOpen = () => setOpen(true);
@@ -80,9 +84,11 @@ export const LoginPage = () => {
 					<Button
 						onClick={async () => {
 							const result = await store.registration(email, password);
-							if (result) {
-								navigate("/user");
+							if (result.status) {
+								navigate("/office");
+								return;
 							}
+							setSnackBartoQueue("error", result.message)();
 						}}
 					>
 						зарегестрироваться
@@ -91,9 +97,11 @@ export const LoginPage = () => {
 					<Button
 						onClick={async () => {
 							const result = await store.login(email, password);
-							if (result) {
-								navigate("/user");
+							if (result.status) {
+								navigate("/office");
+								return;
 							}
+							setSnackBartoQueue("error", result.message)();
 						}}
 					>
 						авторизоваться

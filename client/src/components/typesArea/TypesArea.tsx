@@ -9,11 +9,16 @@ import CardMedia from "@mui/material/CardMedia";
 import { Button, CardActionArea, CardActions } from "@mui/material";
 import classes from "./typesArea.module.css";
 import nothinkImg from "../../static/nothinkTypes.png";
+import { useSnackbar, VariantType } from "notistack";
 type AreaPropsType = {
 	user?: boolean;
 };
 
 export const TypesArea: React.FC<AreaPropsType> = observer((props) => {
+	const { enqueueSnackbar } = useSnackbar();
+	const setSnackBartoQueue = (variant: VariantType, message: string) => () => {
+		enqueueSnackbar(message, { variant });
+	};
 	React.useEffect(() => {
 		typeStore.fetchTypes();
 	}, []);
@@ -48,7 +53,10 @@ export const TypesArea: React.FC<AreaPropsType> = observer((props) => {
 							{props.user ? null : (
 								<CardActions>
 									<Button
-										onClick={async () => await typeStore.fetchToDelete(el.id)}
+										onClick={async () => {
+											const result = await typeStore.fetchToDelete(el.id);
+											setSnackBartoQueue(result.variant, result.message)();
+										}}
 										size="small"
 										color="primary"
 									>

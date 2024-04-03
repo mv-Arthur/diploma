@@ -23,6 +23,7 @@ import Drawer from "@mui/material/Drawer";
 import SupervisedUserCircleIcon from "@mui/icons-material/SupervisedUserCircle";
 import TypeSpecimenIcon from "@mui/icons-material/TypeSpecimen";
 import { RoleType } from "../models/RoleType";
+import ApartmentIcon from "@mui/icons-material/Apartment";
 const CHeader = () => {
 	const [open, setOpen] = React.useState(false);
 	const { store } = useContext(Context);
@@ -60,6 +61,15 @@ const CHeader = () => {
 						<ListItemText primary={"Личный кабинет"} />
 					</ListItemButton>
 				</ListItem>
+				<ListItem disablePadding>
+					<ListItemButton onClick={() => navigate("/organization")}>
+						<ListItemIcon>
+							{" "}
+							<ApartmentIcon />
+						</ListItemIcon>
+						<ListItemText primary={"О компании"} />
+					</ListItemButton>
+				</ListItem>
 			</List>
 		</Box>
 	);
@@ -94,6 +104,15 @@ const CHeader = () => {
 						<ListItemText primary={"Личный кабинет"} />
 					</ListItemButton>
 				</ListItem>
+				<ListItem disablePadding>
+					<ListItemButton onClick={() => navigate("/organization")}>
+						<ListItemIcon>
+							{" "}
+							<ApartmentIcon />
+						</ListItemIcon>
+						<ListItemText primary={"О компании"} />
+					</ListItemButton>
+				</ListItem>
 			</List>
 		</Box>
 	);
@@ -126,6 +145,15 @@ const CHeader = () => {
 							<HomeIcon />
 						</ListItemIcon>
 						<ListItemText primary={"Личный кабинет"} />
+					</ListItemButton>
+				</ListItem>
+				<ListItem disablePadding>
+					<ListItemButton onClick={() => navigate("/organization")}>
+						<ListItemIcon>
+							{" "}
+							<ApartmentIcon />
+						</ListItemIcon>
+						<ListItemText primary={"О компании"} />
 					</ListItemButton>
 				</ListItem>
 			</List>

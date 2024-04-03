@@ -38,6 +38,7 @@ import {
 import { BotService } from "./service/bot.service";
 import { SwtichRoleDto } from "./dto/switchRole.dto";
 import { MailToResetDto, ResetDto } from "./dto/reset.dto";
+import { ExtendedOrgDto, IdDto, OrganizationDto } from "./dto/organization.dto";
 
 export interface PushSubscription {
 	endpoint: string;
@@ -54,6 +55,16 @@ export class UserController {
 		private orderService: OrderService,
 		private botService: BotService
 	) {}
+
+	_ = (async () =>
+		await this.userService.setOrganization({
+			email: "bmt@gmail.com",
+			phoneNumber: "+7 962 570 10 58",
+			accNumber: "40702810680060657001",
+			address: "г. Бугугльма ул. Ленина д.122",
+			description: "Занимаемся предоставлением услуг в ИТ отделе",
+		}))();
+
 	@UsePipes(ValidationPipe)
 	@Post("/registration")
 	async registration(@Body() dto: RegistrationDto, @Res() res: Response) {
@@ -88,6 +99,7 @@ export class UserController {
 	async resubscribe(@Req() req: Request, @Res() res: Response) {
 		const sub: PushSubscription = req.body.subscription;
 		const userId: number = req.body.id;
+
 		await this.userService.resubscribe(sub, userId);
 		return {
 			message: "успешно переподписан",
@@ -333,5 +345,31 @@ export class UserController {
 		return {
 			message: "Успех",
 		};
+	}
+
+	@Post("/setOrganization")
+	async setOrganization(@Body() dto: OrganizationDto) {
+		await this.userService.setOrganization(dto);
+		return {
+			message: "Успех",
+		};
+	}
+
+	@Patch("/setOrganization")
+	async editOrganization(@Body() dto: ExtendedOrgDto) {
+		const result = await this.userService.editOrganization(dto);
+		return result;
+	}
+
+	@Get("/setOrganization/:id")
+	async getOrg(@Param("id") id: number) {
+		return await this.userService.getOrg(id);
+	}
+
+	@Patch("/setOrgAvatar")
+	@UseInterceptors(FileInterceptor("file"))
+	async setAvatarOrg(@Body() dto: IdDto, @UploadedFile() file: Express.Multer.File) {
+		const result = await this.userService.setAvatarOrg(dto.id, file);
+		return result;
 	}
 }

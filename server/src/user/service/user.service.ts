@@ -18,6 +18,8 @@ import { rename } from "fs";
 import { PersonalDto } from "../dto/personalCreation.dto";
 import { BotService } from "./bot.service";
 import { RoleType } from "../types/RoleType";
+import { Organization } from "../model/organisation.model";
+import { ExtendedOrgDto, OrganizationDto } from "../dto/organization.dto";
 @Injectable()
 export class UserService {
 	constructor(
@@ -29,6 +31,7 @@ export class UserService {
 		@InjectModel(Keys) private keysRepository: typeof Keys,
 		@InjectModel(Subscription) private subsciptionRepository: typeof Subscription,
 		@InjectModel(Personal) private personalRepository: typeof Personal,
+		@InjectModel(Organization) private organisationRepository: typeof Organization,
 		private botService: BotService
 	) {}
 
@@ -110,6 +113,8 @@ export class UserService {
 			},
 		});
 
+		if (!subscription) throw new HttpException("подписка не найдена", HttpStatus.BAD_REQUEST);
+
 		const keys = await this.keysRepository.findOne({
 			where: {
 				subscriptionId: subscription.id,
@@ -182,6 +187,9 @@ export class UserService {
 		if (!candidate) throw new HttpException("пользователь не найден", HttpStatus.BAD_REQUEST);
 
 		candidate.role = role;
+		if (role === "admin" || role === "accounting") {
+			candidate.isActivated = true;
+		}
 		await candidate.save();
 
 		return {
@@ -382,5 +390,57 @@ export class UserService {
 		const userDto = new UserDto(user);
 		const tokens = this.tokenService.generateToken({ ...userDto });
 		await this.tokenService.saveToken(userDto.id, tokens.refreshToken);
+	}
+
+	async setOrganization(dto: OrganizationDto) {
+		await this.organisationRepository.create({ ...dto });
+	}
+
+	async editOrganization(dto: ExtendedOrgDto) {
+		const org = await this.organisationRepository.findOne({ where: { id: dto.id } });
+		if (!org) throw new HttpException("данные не найдены", HttpStatus.BAD_REQUEST);
+
+		org.email = dto.email;
+		org.phoneNumber = dto.phoneNumber;
+		org.accNumber = dto.accNumber;
+		org.address = dto.address;
+		org.description = dto.description;
+
+		await org.save();
+
+		return org;
+	}
+
+	async setAvatarOrg(id: number, file: Express.Multer.File) {
+		const extention = this.orderService.getExtension(file.originalname);
+		const fileName = uuidv4() + `.${extention}`;
+		const filePath = join(__dirname, "..", "uploads", fileName);
+		if (extention) {
+			rename(file.path, filePath, (err) => {
+				if (err) {
+					console.error(err);
+					throw new HttpException("ошибка при чтении файла", HttpStatus.BAD_REQUEST);
+				}
+				console.log(`переименован успешно`);
+			});
+		}
+
+		const org = await this.organisationRepository.findOne({
+			where: { id: id },
+		});
+
+		if (!org) throw new HttpException("данные не найдены", HttpStatus.BAD_REQUEST);
+
+		org.avatar = fileName;
+
+		await org.save();
+
+		return fileName;
+	}
+
+	async getOrg(id: number) {
+		const org = await this.organisationRepository.findOne({ where: { id } });
+		if (!org) throw new HttpException("данные не найдены", HttpStatus.BAD_REQUEST);
+		return org;
 	}
 }

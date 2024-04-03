@@ -1,10 +1,11 @@
 import React, { useContext } from "react";
-
+import { SnackbarProvider } from "notistack";
 import { observer } from "mobx-react-lite";
 
 import CustomRouter from "./routes/routes";
 import { Context } from ".";
 import { useNavigate } from "react-router-dom";
+import { accStore } from "./store/accStore";
 
 function App() {
 	const { store } = useContext(Context);
@@ -13,16 +14,19 @@ function App() {
 		if (localStorage.getItem("token")) {
 			(async () => {
 				await store.checkAuth();
-				navigate("/user");
+				await accStore.fetchOrg(1);
+
+				navigate("/office");
 			})();
 		}
+
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, []);
 
 	return (
-		<div className="App">
+		<SnackbarProvider maxSnack={1} className="App">
 			<CustomRouter isAuth={store.isAuth} />
-		</div>
+		</SnackbarProvider>
 	);
 }
 

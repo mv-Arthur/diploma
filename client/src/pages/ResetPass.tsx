@@ -7,6 +7,7 @@ import Paper from "@mui/material/Paper";
 import TextField from "@mui/material/TextField";
 import { Button } from "@mui/material";
 import { AuthService } from "../services/AuthService";
+import SimpleMDE from "react-simplemde-editor";
 export const ResetPass = () => {
 	const param = useParams();
 	const navigate = useNavigate();

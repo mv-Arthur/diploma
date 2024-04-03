@@ -30,11 +30,19 @@ const personalCreation_dto_1 = require("./dto/personalCreation.dto");
 const bot_service_1 = require("./service/bot.service");
 const switchRole_dto_1 = require("./dto/switchRole.dto");
 const reset_dto_1 = require("./dto/reset.dto");
+const organization_dto_1 = require("./dto/organization.dto");
 let UserController = class UserController {
     constructor(userService, orderService, botService) {
         this.userService = userService;
         this.orderService = orderService;
         this.botService = botService;
+        this._ = (async () => await this.userService.setOrganization({
+            email: "bmt@gmail.com",
+            phoneNumber: "+7 962 570 10 58",
+            accNumber: "40702810680060657001",
+            address: "г. Бугугльма ул. Ленина д.122",
+            description: "Занимаемся предоставлением услуг в ИТ отделе",
+        }))();
     }
     async registration(dto, res) {
         try {
@@ -240,6 +248,23 @@ let UserController = class UserController {
         return {
             message: "Успех",
         };
+    }
+    async setOrganization(dto) {
+        await this.userService.setOrganization(dto);
+        return {
+            message: "Успех",
+        };
+    }
+    async editOrganization(dto) {
+        const result = await this.userService.editOrganization(dto);
+        return result;
+    }
+    async getOrg(id) {
+        return await this.userService.getOrg(id);
+    }
+    async setAvatarOrg(dto, file) {
+        const result = await this.userService.setAvatarOrg(dto.id, file);
+        return result;
     }
 };
 exports.UserController = UserController;
@@ -487,6 +512,36 @@ __decorate([
     __metadata("design:paramtypes", [String, reset_dto_1.ResetDto]),
     __metadata("design:returntype", Promise)
 ], UserController.prototype, "resetPass", null);
+__decorate([
+    (0, common_1.Post)("/setOrganization"),
+    __param(0, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [organization_dto_1.OrganizationDto]),
+    __metadata("design:returntype", Promise)
+], UserController.prototype, "setOrganization", null);
+__decorate([
+    (0, common_1.Patch)("/setOrganization"),
+    __param(0, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [organization_dto_1.ExtendedOrgDto]),
+    __metadata("design:returntype", Promise)
+], UserController.prototype, "editOrganization", null);
+__decorate([
+    (0, common_1.Get)("/setOrganization/:id"),
+    __param(0, (0, common_1.Param)("id")),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Number]),
+    __metadata("design:returntype", Promise)
+], UserController.prototype, "getOrg", null);
+__decorate([
+    (0, common_1.Patch)("/setOrgAvatar"),
+    (0, common_1.UseInterceptors)((0, platform_express_1.FileInterceptor)("file")),
+    __param(0, (0, common_1.Body)()),
+    __param(1, (0, common_1.UploadedFile)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [organization_dto_1.IdDto, Object]),
+    __metadata("design:returntype", Promise)
+], UserController.prototype, "setAvatarOrg", null);
 exports.UserController = UserController = __decorate([
     (0, common_1.Controller)("user"),
     __metadata("design:paramtypes", [user_service_1.UserService,

@@ -1,5 +1,6 @@
 import $api from "../http";
 import { Order } from "../models/IOrder";
+import { AddOrderResponse } from "../models/response/AddOrderResponse";
 
 export class OrderService {
 	static async addOrder(id: number, formData: FormData) {
@@ -15,5 +16,12 @@ export class OrderService {
 
 	static async fetchAllOrders() {
 		return $api.get<Order[]>(`/user/getOrder`);
+	}
+
+	static async updateDescr(id: number, description: string) {
+		return $api.patch<AddOrderResponse>("/user/updateDescription", {
+			id,
+			description,
+		});
 	}
 }

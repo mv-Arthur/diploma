@@ -13,7 +13,7 @@ import TableHead from "@mui/material/TableHead";
 import TableRow from "@mui/material/TableRow";
 import Paper from "@mui/material/Paper";
 import { useReactToPrint } from "react-to-print";
-
+import noth from "../../static/noAccData.png";
 export const AccountingPage = observer(() => {
 	const [current, setCurrent] = React.useState<GetAllAccResponse>();
 	const printRef = React.useRef<HTMLDivElement | null>(null);
@@ -134,7 +134,10 @@ export const AccountingPage = observer(() => {
 					)}
 				</>
 			) : (
-				<div>пока ничего нет</div>
+				<div className={classes.nothink}>
+					<Typography variant="h2">Пока отчетов нет</Typography>
+					<img src={noth} alt="" />
+				</div>
 			)}
 		</div>
 	);
