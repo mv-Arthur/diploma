@@ -16,6 +16,7 @@ const order_model_1 = require("./order.model");
 const vapid_model_1 = require("./vapid.model");
 const subscription_model_1 = require("./subscription.model");
 const personal_model_1 = require("./personal.model");
+const type_model_1 = require("./type.model");
 let User = class User extends sequelize_typescript_1.Model {
 };
 exports.User = User;
@@ -76,6 +77,11 @@ __decorate([
     (0, sequelize_typescript_1.HasOne)(() => personal_model_1.Personal),
     __metadata("design:type", personal_model_1.Personal)
 ], User.prototype, "personal", void 0);
+__decorate([
+    (0, sequelize_typescript_1.ForeignKey)(() => type_model_1.Type),
+    (0, sequelize_typescript_1.Column)({ type: sequelize_typescript_1.DataType.INTEGER }),
+    __metadata("design:type", Number)
+], User.prototype, "typeId", void 0);
 exports.User = User = __decorate([
     (0, sequelize_typescript_1.Table)({ tableName: "user", timestamps: false })
 ], User);

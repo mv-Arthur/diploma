@@ -2,20 +2,20 @@ import { observer } from "mobx-react-lite";
 import React, { useContext } from "react";
 import { orderAdminStore } from "../../store/orderAdminStore";
 import { API_URL } from "../../http";
-import { OrderComponent } from "../Order";
+
 import { GetAllOrdersResponse } from "../../models/response/GetAllOrdersResponse";
 import classes from "./style.module.css";
 import Typography from "@mui/material/Typography";
 import { Context } from "../..";
-import defaultAvatar from "../../static/defaultAvatar.jpg";
+
 import { Button } from "@mui/material";
-import nothinkImg from "../../static/nothinkAdmin.png";
-import userImg from "../../static/unauthtorizeImg.png";
+
 import ArticleIcon from "@mui/icons-material/Article";
 import Box from "@mui/material/Box";
 import Modal from "@mui/material/Modal";
 import { UserArea } from "../userArea/UserArea";
 import { useSnackbar, VariantType } from "notistack";
+import { RoleType } from "../../models/RoleType";
 export const selected = {
 	height: "30px",
 	cursor: "pointer",
@@ -80,7 +80,7 @@ export const OrderAdmin = observer(() => {
 	React.useEffect(() => {
 		(async () => {
 			try {
-				const response = await orderAdminStore.fetchingOrders();
+				await orderAdminStore.fetchingOrders();
 				if (orderAdminStore.ordersForUsers.length) {
 					setCurrentUser(findFirst(orderAdminStore.ordersForUsers));
 				}
@@ -94,6 +94,12 @@ export const OrderAdmin = observer(() => {
 	};
 	const handleDownload = (id: number) => {
 		window.location.href = `${API_URL}/user/download/${id}`;
+	};
+
+	console.log(currentUser);
+
+	const handleChangeRole = (role: RoleType) => {
+		setCurrentUser(currentUser && { ...currentUser, role });
 	};
 
 	const handleGet = async (status: string, price: string, id: number) => {
@@ -145,6 +151,7 @@ export const OrderAdmin = observer(() => {
 
 				<div className={classes.right}>
 					<UserArea
+						handleChangeRole={handleChangeRole}
 						currentUser={currentUser}
 						handleDownload={handleDownload}
 						handleGet={handleGet}

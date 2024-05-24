@@ -25,5 +25,6 @@ export declare class User extends Model<User, CreationAttrs> {
     vapid: Vapid;
     subscription: Subscription;
     personal: Personal;
+    typeId: number;
 }
 export {};

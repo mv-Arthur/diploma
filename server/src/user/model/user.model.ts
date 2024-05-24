@@ -5,6 +5,7 @@ import { Order } from "./order.model";
 import { Vapid } from "./vapid.model";
 import { Subscription } from "./subscription.model";
 import { Personal } from "./personal.model";
+import { Type } from "./type.model";
 
 interface CreationAttrs {
 	email: string;
@@ -46,4 +47,7 @@ export class User extends Model<User, CreationAttrs> {
 	subscription: Subscription;
 	@HasOne(() => Personal)
 	personal: Personal;
+	@ForeignKey(() => Type)
+	@Column({ type: DataType.INTEGER })
+	typeId: number;
 }

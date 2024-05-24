@@ -7,11 +7,12 @@ import { AddOrderDto } from "../dto/addOrder.dto";
 import { StatusType } from "../types/StatusType";
 import { Type } from "../model/type.model";
 import { OrderDto } from "../dto/order.dto";
-import { CreateTypeDto } from "../dto/createType.dto";
+import { CreateTypeDto, TypeDto } from "../dto/createType.dto";
 import { PersonalDto } from "../dto/personalCreation.dto";
 import { Report } from "../model/report.model";
 import { DateU } from "../model/dateU.model";
 import { Sequelize } from "sequelize-typescript";
+import { AttachTypeDto } from "../dto/attachType.dto";
 export declare class OrderService {
     private orderRepository;
     private userRepository;
@@ -32,7 +33,7 @@ export declare class OrderService {
     download(id: number): Promise<string>;
     getAllType(): Promise<Type[]>;
     deleteType(id: number): Promise<{
-        deletedTypeId: any;
+        deletedTypeId: number;
     }>;
     getOrderById(id: number): Promise<{
         id: number;
@@ -47,6 +48,7 @@ export declare class OrderService {
     }[]>;
     getAllOrder(): Promise<{
         id: number;
+        typeId: number;
         email: string;
         role: import("../types/RoleType").RoleType;
         personal: PersonalDto;
@@ -77,4 +79,15 @@ export declare class OrderService {
         message: string;
     }>;
     getRevenue(): Promise<DateU[]>;
+    acttachType(dto: AttachTypeDto): Promise<{
+        typeId: number;
+        userId: number;
+    }>;
+    unattachType(id: number): Promise<{
+        message: string;
+        id: number;
+    }>;
+    updateType(id: number, dto: TypeDto): Promise<{
+        message: string;
+    }>;
 }

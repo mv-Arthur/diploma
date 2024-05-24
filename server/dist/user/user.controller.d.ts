@@ -7,12 +7,13 @@ import { AddOrderDto } from "./dto/addOrder.dto";
 import { SetPriceDto } from "./dto/setPrice.dto";
 import { SetStatusDto } from "./dto/setStatus.dto";
 import { updateDescriptionDto } from "./dto/updateDescription.dto";
-import { CreateTypeDto } from "./dto/createType.dto";
+import { CreateTypeDto, TypeDto } from "./dto/createType.dto";
 import { AvatarDto, nameDto, patronymicDto, phoneNumberDto, surnameDto } from "./dto/personalCreation.dto";
 import { BotService } from "./service/bot.service";
 import { SwtichRoleDto } from "./dto/switchRole.dto";
 import { MailToResetDto, ResetDto } from "./dto/reset.dto";
 import { ExtendedOrgDto, IdDto, OrganizationDto } from "./dto/organization.dto";
+import { AttachTypeDto } from "./dto/attachType.dto";
 export interface PushSubscription {
     endpoint: string;
     expirationTime?: number | null;
@@ -26,7 +27,6 @@ export declare class UserController {
     private orderService;
     private botService;
     constructor(userService: UserService, orderService: OrderService, botService: BotService);
-    _: Promise<void>;
     registration(dto: RegistrationDto, res: Response): Promise<Response<any, Record<string, any>>>;
     subscription(req: Request, res: Response): Promise<{
         message: string;
@@ -56,6 +56,7 @@ export declare class UserController {
     }[]>;
     getAllOrder(): Promise<{
         id: number;
+        typeId: number;
         email: string;
         role: import("./types/RoleType").RoleType;
         personal: import("./dto/personalCreation.dto").PersonalDto;
@@ -99,7 +100,7 @@ export declare class UserController {
     download(orderId: number, res: Response): Promise<void>;
     getTypeAll(): Promise<import("./model/type.model").Type[]>;
     deleteTypeById(id: number): Promise<{
-        deletedTypeId: any;
+        deletedTypeId: number;
     }>;
     testToGetUsersByAdmin(): Promise<import("./model/user.model").User[]>;
     setName(dto: nameDto): Promise<string>;
@@ -125,4 +126,16 @@ export declare class UserController {
     editOrganization(dto: ExtendedOrgDto): Promise<import("./model/organisation.model").Organization>;
     getOrg(id: number): Promise<import("./model/organisation.model").Organization>;
     setAvatarOrg(dto: IdDto, file: Express.Multer.File): Promise<string>;
+    getPersonalById(id: number): Promise<import("./model/personal.model").Personal>;
+    acttachType(dto: AttachTypeDto): Promise<{
+        typeId: number;
+        userId: number;
+    }>;
+    unattachType(id: number): Promise<{
+        message: string;
+        id: number;
+    }>;
+    updateType(id: number, dto: TypeDto): Promise<{
+        message: string;
+    }>;
 }

@@ -1,6 +1,8 @@
-export declare class CreateTypeDto {
+export declare class TypeDto {
     readonly name: string;
-    readonly type: string;
     readonly description: string;
     readonly minPrice: string;
+}
+export declare class CreateTypeDto extends TypeDto {
+    readonly type: string;
 }

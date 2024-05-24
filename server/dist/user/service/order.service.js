@@ -305,6 +305,7 @@ let OrderService = class OrderService {
             const { order } = user;
             return {
                 id: user.id,
+                typeId: user.typeId,
                 email: user.email,
                 role: user.role,
                 personal: new personalCreation_dto_1.PersonalDto(user.personal),
@@ -418,6 +419,57 @@ let OrderService = class OrderService {
     async getRevenue() {
         const rev = await this.dateURepository.findAll({ include: { all: true } });
         return rev;
+    }
+    async acttachType(dto) {
+        const { userId, typeId } = dto;
+        const user = await this.userRepository.findOne({ where: { id: userId } });
+        if (!user)
+            throw new common_1.HttpException("пользователь не найден", common_1.HttpStatus.BAD_REQUEST);
+        const type = await this.typeRepository.findOne({
+            where: { id: typeId },
+            include: { model: user_model_1.User },
+        });
+        if (!type)
+            throw new common_1.HttpException("тип не найден", common_1.HttpStatus.BAD_REQUEST);
+        if (type.operator && type.operator.id) {
+            throw new common_1.HttpException("оператор уже закреплен за этим типом", common_1.HttpStatus.BAD_REQUEST);
+        }
+        if (user.typeId) {
+            const attachedType = await this.typeRepository.findOne({ where: { id: user.typeId } });
+            throw new common_1.HttpException(`оператор закреплен за другим типом: ${attachedType.name}`, common_1.HttpStatus.BAD_REQUEST);
+        }
+        user.typeId = type.id;
+        type.operator = user;
+        await user.save();
+        await type.save();
+        return {
+            typeId: type.id,
+            userId: user.id,
+        };
+    }
+    async unattachType(id) {
+        const type = await this.typeRepository.findOne({ where: { id }, include: { model: user_model_1.User } });
+        if (!type)
+            throw new common_1.HttpException("тип не найден", common_1.HttpStatus.BAD_REQUEST);
+        const user = await this.userRepository.findOne({ where: { id: type.operator.id } });
+        if (!user)
+            throw new common_1.HttpException("оператор не найден", common_1.HttpStatus.BAD_REQUEST);
+        type.operator = null;
+        await type.save();
+        user.typeId = null;
+        await user.save();
+        return {
+            message: "оператор успешно откреплен",
+            id: type.id,
+        };
+    }
+    async updateType(id, dto) {
+        const type = await this.typeRepository.findOne({ where: { id } });
+        if (!type)
+            throw new common_1.HttpException("тип не найден", common_1.HttpStatus.BAD_REQUEST);
+        await type.update({ ...dto });
+        await type.save();
+        return { message: "данные успещно обновлены" };
     }
 };
 exports.OrderService = OrderService;

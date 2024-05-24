@@ -1,8 +1,12 @@
-export interface IOrderType {
+export interface IOrderType extends IType {
 	id: number;
-	name: string;
+
 	type: string;
 	fileName: string;
+}
+
+export interface IType {
+	name: string;
 	description: string;
 	minPrice: string;
 }

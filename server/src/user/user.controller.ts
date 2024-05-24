@@ -27,7 +27,7 @@ import { RoleGuard } from "./role.guard";
 import { SetPriceDto } from "./dto/setPrice.dto";
 import { SetStatusDto } from "./dto/setStatus.dto";
 import { updateDescriptionDto } from "./dto/updateDescription.dto";
-import { CreateTypeDto } from "./dto/createType.dto";
+import { CreateTypeDto, TypeDto } from "./dto/createType.dto";
 import {
 	AvatarDto,
 	nameDto,
@@ -39,6 +39,7 @@ import { BotService } from "./service/bot.service";
 import { SwtichRoleDto } from "./dto/switchRole.dto";
 import { MailToResetDto, ResetDto } from "./dto/reset.dto";
 import { ExtendedOrgDto, IdDto, OrganizationDto } from "./dto/organization.dto";
+import { AttachTypeDto } from "./dto/attachType.dto";
 
 export interface PushSubscription {
 	endpoint: string;
@@ -55,15 +56,6 @@ export class UserController {
 		private orderService: OrderService,
 		private botService: BotService
 	) {}
-
-	_ = (async () =>
-		await this.userService.setOrganization({
-			email: "bmt@gmail.com",
-			phoneNumber: "+7 962 570 10 58",
-			accNumber: "40702810680060657001",
-			address: "г. Бугугльма ул. Ленина д.122",
-			description: "Занимаемся предоставлением услуг в ИТ отделе",
-		}))();
 
 	@UsePipes(ValidationPipe)
 	@Post("/registration")
@@ -170,7 +162,7 @@ export class UserController {
 		try {
 			const { refreshToken } = req.cookies;
 			const userData = await this.userService.refresh(refreshToken);
-			res.cookie(userData.refreshToken, {
+			res.cookie("refreshToken", userData.refreshToken, {
 				maxAge: 30 * 24 * 60 * 60 * 1000,
 				httpOnly: true,
 			});
@@ -371,5 +363,26 @@ export class UserController {
 	async setAvatarOrg(@Body() dto: IdDto, @UploadedFile() file: Express.Multer.File) {
 		const result = await this.userService.setAvatarOrg(dto.id, file);
 		return result;
+	}
+
+	@Get("/personal/:id")
+	async getPersonalById(@Param("id") id: number) {
+		return await this.userService.getPersonalById(id);
+	}
+
+	@Post("/attachType")
+	async acttachType(@Body() dto: AttachTypeDto) {
+		return await this.orderService.acttachType(dto);
+	}
+
+	@Delete("/attachType/:id")
+	async unattachType(@Param("id") id: number) {
+		return await this.orderService.unattachType(id);
+		// console.log(id);
+	}
+
+	@Patch("/types/:id")
+	async updateType(@Param("id") id: number, dto: TypeDto) {
+		return await this.orderService.updateType(id, dto);
 	}
 }

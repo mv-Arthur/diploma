@@ -16,12 +16,15 @@ import { Vapid } from "../model/vapid.model";
 
 import { Subscription } from "../model/subscription.model";
 import { Keys } from "../model/keys.model";
-import { CreateTypeDto } from "../dto/createType.dto";
+import { CreateTypeDto, TypeDto } from "../dto/createType.dto";
 import { Personal } from "../model/personal.model";
 import { PersonalDto } from "../dto/personalCreation.dto";
 import { Report } from "../model/report.model";
 import { DateU } from "../model/dateU.model";
 import { Sequelize } from "sequelize-typescript";
+import { AttachTypeDto } from "../dto/attachType.dto";
+import { type } from "os";
+import { where } from "sequelize";
 @Injectable()
 export class OrderService {
 	constructor(
@@ -347,6 +350,7 @@ export class OrderService {
 
 			return {
 				id: user.id,
+				typeId: user.typeId,
 				email: user.email,
 				role: user.role,
 				personal: new PersonalDto(user.personal),
@@ -472,5 +476,71 @@ export class OrderService {
 	async getRevenue() {
 		const rev = await this.dateURepository.findAll({ include: { all: true } });
 		return rev;
+	}
+
+	async acttachType(dto: AttachTypeDto) {
+		const { userId, typeId } = dto;
+
+		const user = await this.userRepository.findOne({ where: { id: userId } });
+
+		if (!user) throw new HttpException("пользователь не найден", HttpStatus.BAD_REQUEST);
+
+		const type = await this.typeRepository.findOne({
+			where: { id: typeId },
+			include: { model: User },
+		});
+
+		if (!type) throw new HttpException("тип не найден", HttpStatus.BAD_REQUEST);
+
+		if (type.operator && type.operator.id) {
+			throw new HttpException("оператор уже закреплен за этим типом", HttpStatus.BAD_REQUEST);
+		}
+
+		if (user.typeId) {
+			const attachedType = await this.typeRepository.findOne({ where: { id: user.typeId } });
+			throw new HttpException(
+				`оператор закреплен за другим типом: ${attachedType.name}`,
+				HttpStatus.BAD_REQUEST
+			);
+		}
+
+		user.typeId = type.id;
+		type.operator = user;
+		await user.save();
+		await type.save();
+
+		return {
+			typeId: type.id,
+			userId: user.id,
+		};
+	}
+
+	async unattachType(id: number) {
+		const type = await this.typeRepository.findOne({ where: { id }, include: { model: User } });
+		// console.log(type);
+		if (!type) throw new HttpException("тип не найден", HttpStatus.BAD_REQUEST);
+
+		const user = await this.userRepository.findOne({ where: { id: type.operator.id } });
+
+		if (!user) throw new HttpException("оператор не найден", HttpStatus.BAD_REQUEST);
+
+		type.operator = null;
+		await type.save();
+
+		user.typeId = null;
+		await user.save();
+
+		return {
+			message: "оператор успешно откреплен",
+			id: type.id,
+		};
+	}
+
+	async updateType(id: number, dto: TypeDto) {
+		const type = await this.typeRepository.findOne({ where: { id } });
+		if (!type) throw new HttpException("тип не найден", HttpStatus.BAD_REQUEST);
+		await type.update({ ...dto });
+		await type.save();
+		return { message: "данные успещно обновлены" };
 	}
 }

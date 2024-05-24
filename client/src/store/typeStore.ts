@@ -1,5 +1,5 @@
 import { makeAutoObservable, runInAction } from "mobx";
-import { IOrderType } from "../models/IOrderType";
+import { IOrderType, IType } from "../models/IOrderType";
 import { OrderTypeService } from "../services/OrderTypeService";
 import { AsyncActionReturnType } from "../models/asynActionsReturnType";
 
@@ -27,6 +27,17 @@ class TypeStore {
 		if (founded) {
 			this.current = founded;
 		}
+	}
+
+	updateType(id: number, updated: IType) {
+		this.types = this.types.map((type) => {
+			if (type.id === id) return { ...type, ...updated };
+			return type;
+		});
+	}
+
+	async fetchToUpdateType() {
+		
 	}
 
 	async fetchToDelete(id: number): Promise<AsyncActionReturnType> {

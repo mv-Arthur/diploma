@@ -31,18 +31,12 @@ const bot_service_1 = require("./service/bot.service");
 const switchRole_dto_1 = require("./dto/switchRole.dto");
 const reset_dto_1 = require("./dto/reset.dto");
 const organization_dto_1 = require("./dto/organization.dto");
+const attachType_dto_1 = require("./dto/attachType.dto");
 let UserController = class UserController {
     constructor(userService, orderService, botService) {
         this.userService = userService;
         this.orderService = orderService;
         this.botService = botService;
-        this._ = (async () => await this.userService.setOrganization({
-            email: "bmt@gmail.com",
-            phoneNumber: "+7 962 570 10 58",
-            accNumber: "40702810680060657001",
-            address: "г. Бугугльма ул. Ленина д.122",
-            description: "Занимаемся предоставлением услуг в ИТ отделе",
-        }))();
     }
     async registration(dto, res) {
         try {
@@ -133,7 +127,7 @@ let UserController = class UserController {
         try {
             const { refreshToken } = req.cookies;
             const userData = await this.userService.refresh(refreshToken);
-            res.cookie(userData.refreshToken, {
+            res.cookie("refreshToken", userData.refreshToken, {
                 maxAge: 30 * 24 * 60 * 60 * 1000,
                 httpOnly: true,
             });
@@ -265,6 +259,18 @@ let UserController = class UserController {
     async setAvatarOrg(dto, file) {
         const result = await this.userService.setAvatarOrg(dto.id, file);
         return result;
+    }
+    async getPersonalById(id) {
+        return await this.userService.getPersonalById(id);
+    }
+    async acttachType(dto) {
+        return await this.orderService.acttachType(dto);
+    }
+    async unattachType(id) {
+        return await this.orderService.unattachType(id);
+    }
+    async updateType(id, dto) {
+        return await this.orderService.updateType(id, dto);
     }
 };
 exports.UserController = UserController;
@@ -542,6 +548,34 @@ __decorate([
     __metadata("design:paramtypes", [organization_dto_1.IdDto, Object]),
     __metadata("design:returntype", Promise)
 ], UserController.prototype, "setAvatarOrg", null);
+__decorate([
+    (0, common_1.Get)("/personal/:id"),
+    __param(0, (0, common_1.Param)("id")),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Number]),
+    __metadata("design:returntype", Promise)
+], UserController.prototype, "getPersonalById", null);
+__decorate([
+    (0, common_1.Post)("/attachType"),
+    __param(0, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [attachType_dto_1.AttachTypeDto]),
+    __metadata("design:returntype", Promise)
+], UserController.prototype, "acttachType", null);
+__decorate([
+    (0, common_1.Delete)("/attachType/:id"),
+    __param(0, (0, common_1.Param)("id")),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Number]),
+    __metadata("design:returntype", Promise)
+], UserController.prototype, "unattachType", null);
+__decorate([
+    (0, common_1.Patch)("/types/:id"),
+    __param(0, (0, common_1.Param)("id")),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Number, createType_dto_1.TypeDto]),
+    __metadata("design:returntype", Promise)
+], UserController.prototype, "updateType", null);
 exports.UserController = UserController = __decorate([
     (0, common_1.Controller)("user"),
     __metadata("design:paramtypes", [user_service_1.UserService,

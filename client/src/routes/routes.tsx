@@ -3,7 +3,7 @@ import { Route, Routes } from "react-router-dom";
 import { LoginPage } from "../pages/LoginPage";
 import { observer } from "mobx-react-lite";
 import { Context } from "..";
-import UserPage from "../pages/UserPage";
+import UserPage from "../pages/userPage/UserPage";
 
 import PublicRoutes from "./publicRoutes";
 import PrivateRoutes from "./privateRotes";

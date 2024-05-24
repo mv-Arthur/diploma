@@ -4,6 +4,7 @@ export interface GetAllOrdersResponse {
 	id: number;
 	email: string;
 	role: string;
+	typeId: number | null;
 	order: Order[];
 	personal: Personal;
 }
@@ -14,4 +15,9 @@ interface Personal {
 	patronymic: string;
 	phoneNumber: string;
 	avatar: string;
+}
+
+export interface AttachResponse {
+	typeId: number;
+	userId: number;
 }

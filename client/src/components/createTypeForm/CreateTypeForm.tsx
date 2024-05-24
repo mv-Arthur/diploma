@@ -1,6 +1,5 @@
 import React from "react";
 import TextField from "@mui/material/TextField";
-import Box from "@mui/material/Box";
 import { observer } from "mobx-react-lite";
 import Button from "@mui/material/Button";
 import Typography from "@mui/material/Typography";

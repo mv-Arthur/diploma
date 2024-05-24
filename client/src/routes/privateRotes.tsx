@@ -1,6 +1,6 @@
 import React, { useContext } from "react";
 import { Route, Routes } from "react-router-dom";
-import UserPage from "../pages/UserPage";
+import UserPage from "../pages/userPage/UserPage";
 import Container from "@mui/material/Container";
 import { LoginPage } from "../pages/LoginPage";
 import { observer } from "mobx-react-lite";
@@ -15,6 +15,11 @@ import { RoleType } from "../models/RoleType";
 import { AccountingPage } from "../pages/accounting/AccountingPage";
 import { Organization } from "../pages/organization/Organization";
 import { typeStore } from "../store/typeStore";
+import { FullType } from "../pages/fullType/FullType";
+import { orderAdminStore } from "../store/orderAdminStore";
+
+import { TypesPage } from "../pages/TypesPage";
+
 const PrivateRoutes: React.FC = () => {
 	const { store } = useContext(Context);
 	React.useEffect(() => {
@@ -27,7 +32,10 @@ const PrivateRoutes: React.FC = () => {
 
 	const choise = (role: RoleType) => {
 		if (role === "user") return <Route path={"/user"} element={<UserPage />} />;
-		if (role === "admin") return <Route path={"/user"} element={<AdminPage />} />;
+		if (role === "admin") {
+			orderAdminStore.fetchingOrders();
+			return <Route path={"/user"} element={<AdminPage />} />;
+		}
 		if (role === "accounting") return <Route path={"/user"} element={<AccountingPage />} />;
 	};
 
@@ -39,34 +47,10 @@ const PrivateRoutes: React.FC = () => {
 				<Route path={"/"} element={<LoginPage />} />
 				<Route path={"/office"} element={<Office />} />
 				<Route path="/organization" element={<Organization role={store.user.role} />} />
-				{store.user.role === "admin" ? (
-					<Route
-						path={"/types"}
-						element={
-							<Container>
-								<CreateTypeForm />
 
-								<TypesArea />
-							</Container>
-						}
-					/>
-				) : (
-					<Route
-						path="/types"
-						element={
-							<Container>
-								<Typography style={{ marginTop: "10px" }} variant="h4">
-									Поддерживаемые услуги
-								</Typography>
-								<Typography>
-									цена может меняться в зависимости от сложности и обьема работ
-								</Typography>
+				<Route path={"/types"} element={<TypesPage isAdmin={store.user.role === "admin"} />} />
 
-								<TypesArea user />
-							</Container>
-						}
-					/>
-				)}
+				{store.user.role === "admin" && <Route path="/types/:id" element={<FullType />} />}
 			</Routes>
 		</div>
 	);

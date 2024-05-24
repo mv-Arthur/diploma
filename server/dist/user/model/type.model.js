@@ -11,9 +11,19 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.Type = void 0;
 const sequelize_typescript_1 = require("sequelize-typescript");
+const user_model_1 = require("./user.model");
 let Type = class Type extends sequelize_typescript_1.Model {
 };
 exports.Type = Type;
+__decorate([
+    (0, sequelize_typescript_1.Column)({
+        type: sequelize_typescript_1.DataType.INTEGER,
+        unique: true,
+        autoIncrement: true,
+        primaryKey: true,
+    }),
+    __metadata("design:type", Number)
+], Type.prototype, "id", void 0);
 __decorate([
     (0, sequelize_typescript_1.Column)({ type: sequelize_typescript_1.DataType.STRING, allowNull: false }),
     __metadata("design:type", String)
@@ -34,6 +44,10 @@ __decorate([
     (0, sequelize_typescript_1.Column)({ type: sequelize_typescript_1.DataType.STRING, allowNull: false, unique: false }),
     __metadata("design:type", String)
 ], Type.prototype, "minPrice", void 0);
+__decorate([
+    (0, sequelize_typescript_1.HasOne)(() => user_model_1.User),
+    __metadata("design:type", user_model_1.User)
+], Type.prototype, "operator", void 0);
 exports.Type = Type = __decorate([
     (0, sequelize_typescript_1.Table)({ tableName: "type", timestamps: false })
 ], Type);

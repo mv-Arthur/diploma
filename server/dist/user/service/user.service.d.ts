@@ -67,5 +67,6 @@ export declare class UserService {
     setOrganization(dto: OrganizationDto): Promise<void>;
     editOrganization(dto: ExtendedOrgDto): Promise<Organization>;
     setAvatarOrg(id: number, file: Express.Multer.File): Promise<string>;
+    getPersonalById(id: number): Promise<Personal>;
     getOrg(id: number): Promise<Organization>;
 }

@@ -1,8 +1,7 @@
 import { observer } from "mobx-react-lite";
 import React from "react";
 import { orderStore } from "../../store/orderStore";
-import Button from "@mui/material/Button";
-import $api, { API_URL } from "../../http";
+import { API_URL } from "../../http";
 import { OrderComponent } from "../Order";
 import nothinkImg from "../../static/nothinkClient.png";
 import classes from "./orderArea.module.css";
@@ -27,6 +26,7 @@ export const OrderArea = observer(() => {
 	const handleChangeStatus = (event: SelectChangeEvent) => {
 		setStatusFilter(event.target.value as string);
 	};
+
 	let filteredOrders = orderStore.orders;
 
 	if (filter !== "all") {

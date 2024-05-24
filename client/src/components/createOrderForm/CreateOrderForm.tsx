@@ -1,10 +1,8 @@
 import { observer } from "mobx-react-lite";
 import React, { useContext } from "react";
-import TextField from "@mui/material/TextField";
 import { SetTypeSelect } from "../SetTypeSelect";
 import Button from "@mui/material/Button";
 import { typeStore } from "../../store/typeStore";
-import SimpleMDE from "react-simplemde-editor";
 import { Context } from "../..";
 import classes from "./orderForm.module.css";
 import { orderStore } from "../../store/orderStore";

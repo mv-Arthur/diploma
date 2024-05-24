@@ -373,6 +373,16 @@ let UserService = class UserService {
         await org.save();
         return fileName;
     }
+    async getPersonalById(id) {
+        const user = await this.personalRepository.findOne({
+            where: {
+                userId: id,
+            },
+        });
+        if (!user)
+            throw new common_1.HttpException("пользователь не найден", common_1.HttpStatus.BAD_REQUEST);
+        return user;
+    }
     async getOrg(id) {
         const org = await this.organisationRepository.findOne({ where: { id } });
         if (!org)
