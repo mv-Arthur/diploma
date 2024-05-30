@@ -7,6 +7,25 @@ export interface GetAllOrdersResponse {
 	typeId: number | null;
 	order: Order[];
 	personal: Personal;
+	operatorSettings: Settings | null;
+}
+
+export interface Settings extends setTypeSettingsBody {
+	id: number;
+	totalEarnings: number;
+}
+
+export interface setTypeSettingsResponse {
+	message: string;
+	operatorSettings: Settings;
+}
+
+export interface setTypeSettingsBody {
+	fulfillmentTime: string;
+	dealPercent: number;
+	fineTardiness: number;
+	retentionRejection: number;
+	userId: number;
 }
 
 interface Personal {

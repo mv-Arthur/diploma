@@ -7,12 +7,13 @@ import { AddOrderDto } from "../dto/addOrder.dto";
 import { StatusType } from "../types/StatusType";
 import { Type } from "../model/type.model";
 import { OrderDto } from "../dto/order.dto";
-import { CreateTypeDto, TypeDto } from "../dto/createType.dto";
+import { CreateSettingsDto, CreateTypeDto, CreationTypeDto, TypeDto } from "../dto/createType.dto";
 import { PersonalDto } from "../dto/personalCreation.dto";
 import { Report } from "../model/report.model";
 import { DateU } from "../model/dateU.model";
 import { Sequelize } from "sequelize-typescript";
 import { AttachTypeDto } from "../dto/attachType.dto";
+import { OperatorSettings } from "../model/operatorSettings.model";
 export declare class OrderService {
     private orderRepository;
     private userRepository;
@@ -21,8 +22,9 @@ export declare class OrderService {
     private typeRepository;
     private reportRepository;
     private dateURepository;
+    private operatorSettingsRepository;
     private readonly sequelize;
-    constructor(orderRepository: typeof Order, userRepository: typeof User, fileRepository: typeof File, statusRepository: typeof Status, typeRepository: typeof Type, reportRepository: typeof Report, dateURepository: typeof DateU, sequelize: Sequelize);
+    constructor(orderRepository: typeof Order, userRepository: typeof User, fileRepository: typeof File, statusRepository: typeof Status, typeRepository: typeof Type, reportRepository: typeof Report, dateURepository: typeof DateU, operatorSettingsRepository: typeof OperatorSettings, sequelize: Sequelize);
     getExtension(filename: string): string | false;
     addOrder(userId: number, file: Express.Multer.File, dto: AddOrderDto): Promise<OrderDto>;
     getAlluser(): Promise<User[]>;
@@ -33,6 +35,7 @@ export declare class OrderService {
     download(id: number): Promise<string>;
     getAllType(): Promise<Type[]>;
     deleteType(id: number): Promise<{
+        message: string;
         deletedTypeId: number;
     }>;
     getOrderById(id: number): Promise<{
@@ -51,6 +54,7 @@ export declare class OrderService {
         typeId: number;
         email: string;
         role: import("../types/RoleType").RoleType;
+        operatorSettings: OperatorSettings;
         personal: PersonalDto;
         order: ({
             id: number;
@@ -89,5 +93,20 @@ export declare class OrderService {
     }>;
     updateType(id: number, dto: TypeDto): Promise<{
         message: string;
+        id: number;
+        requestedData: CreationTypeDto;
+    }>;
+    updateTypePicture(id: number, file: Express.Multer.File): Promise<{
+        message: string;
+        id: number;
+        fileName: string;
+    }>;
+    setTypesSetting(dto: CreateSettingsDto): Promise<{
+        message: string;
+        operatorSettings: OperatorSettings;
+    }>;
+    updateTyepsSettings(dto: CreateSettingsDto): Promise<{
+        message: string;
+        operatorSettings: OperatorSettings;
     }>;
 }

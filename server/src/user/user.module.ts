@@ -27,6 +27,7 @@ import { BotService } from "./service/bot.service";
 import { DateU } from "./model/dateU.model";
 import { Report } from "./model/report.model";
 import { Organization } from "./model/organisation.model";
+import { OperatorSettings } from "./model/operatorSettings.model";
 @Module({
 	controllers: [UserController],
 	providers: [
@@ -56,6 +57,7 @@ import { Organization } from "./model/organisation.model";
 			DateU,
 			Report,
 			Organization,
+			OperatorSettings,
 		]),
 		MulterModule.register({
 			dest: "./dist/user/uploads",

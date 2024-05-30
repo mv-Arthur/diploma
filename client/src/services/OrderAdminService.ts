@@ -1,8 +1,15 @@
 import $api from "../http";
-import { AddOrderResponse, UnattachType } from "../models/response/AddOrderResponse";
-import { AttachResponse, GetAllOrdersResponse } from "../models/response/GetAllOrdersResponse";
+import { AddOrderResponse, UnattachType, UpdatePicture } from "../models/response/AddOrderResponse";
+import {
+	AttachResponse,
+	GetAllOrdersResponse,
+	Settings,
+	setTypeSettingsBody,
+	setTypeSettingsResponse,
+} from "../models/response/GetAllOrdersResponse";
 import { RoleType } from "../models/RoleType";
 import { IType } from "../models/IOrderType";
+import { UpdateTypeResponse } from "../models/response/CreateTypeResponse";
 
 export class OrderAdminService {
 	static async getAllOrders() {
@@ -38,6 +45,22 @@ export class OrderAdminService {
 	}
 
 	static async updateType(id: number, type: IType) {
-		return $api.patch<AddOrderResponse>(`/user/types/${id}`, type);
+		return $api.patch<UpdateTypeResponse>(`/user/types/${id}`, type);
+	}
+
+	static async updateTypePicture(id: number, formData: FormData) {
+		return $api.patch<UpdatePicture>(`user/typesPciture/${id}`, formData, {
+			headers: {
+				"Content-Type": "multipart/form-data",
+			},
+		});
+	}
+
+	static async setTypesSetting(body: setTypeSettingsBody) {
+		return $api.post<setTypeSettingsResponse>("/user/types/setting", body);
+	}
+
+	static async updateTypesSettings(body: setTypeSettingsBody) {
+		return $api.patch<setTypeSettingsResponse>("/user/typesSettings", body);
 	}
 }

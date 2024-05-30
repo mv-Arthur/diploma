@@ -16,15 +16,16 @@ import { Vapid } from "../model/vapid.model";
 
 import { Subscription } from "../model/subscription.model";
 import { Keys } from "../model/keys.model";
-import { CreateTypeDto, TypeDto } from "../dto/createType.dto";
+import { CreateSettingsDto, CreateTypeDto, CreationTypeDto, TypeDto } from "../dto/createType.dto";
 import { Personal } from "../model/personal.model";
 import { PersonalDto } from "../dto/personalCreation.dto";
 import { Report } from "../model/report.model";
 import { DateU } from "../model/dateU.model";
 import { Sequelize } from "sequelize-typescript";
 import { AttachTypeDto } from "../dto/attachType.dto";
-import { type } from "os";
-import { where } from "sequelize";
+
+import { OperatorSettings } from "../model/operatorSettings.model";
+
 @Injectable()
 export class OrderService {
 	constructor(
@@ -35,6 +36,7 @@ export class OrderService {
 		@InjectModel(Type) private typeRepository: typeof Type,
 		@InjectModel(Report) private reportRepository: typeof Report,
 		@InjectModel(DateU) private dateURepository: typeof DateU,
+		@InjectModel(OperatorSettings) private operatorSettingsRepository: typeof OperatorSettings,
 		private readonly sequelize: Sequelize
 	) {}
 
@@ -297,11 +299,24 @@ export class OrderService {
 	async deleteType(id: number) {
 		const type = await this.typeRepository.findOne({ where: { id } });
 		if (!type) throw new HttpException("типы не найдены", HttpStatus.BAD_REQUEST);
+		await this.unattachType(type.id);
 		const delCount = await this.typeRepository.destroy({ where: { id: type.id } });
+
+		const orders = await this.orderRepository.findAll({ include: [File] });
+		await Promise.all(
+			orders.map((order) => {
+				if (order.file.type === type.type) {
+					order.destroy();
+				}
+			})
+		);
+
 		if (!delCount) {
 			throw new HttpException("типы не найдены", HttpStatus.BAD_REQUEST);
 		}
+
 		return {
+			message: "успешно удален",
 			deletedTypeId: type.id,
 		};
 	}
@@ -340,6 +355,7 @@ export class OrderService {
 					model: Order,
 					include: [Status, File],
 				},
+				OperatorSettings,
 			],
 		});
 
@@ -353,6 +369,7 @@ export class OrderService {
 				typeId: user.typeId,
 				email: user.email,
 				role: user.role,
+				operatorSettings: user.operatorSettings,
 				personal: new PersonalDto(user.personal),
 				order: order.map((order) => {
 					const { status, file } = order;
@@ -538,9 +555,82 @@ export class OrderService {
 
 	async updateType(id: number, dto: TypeDto) {
 		const type = await this.typeRepository.findOne({ where: { id } });
+
 		if (!type) throw new HttpException("тип не найден", HttpStatus.BAD_REQUEST);
 		await type.update({ ...dto });
+
+		const requestedData = new CreationTypeDto(type);
+
+		return { message: "данные успешно обновлены", id: type.id, requestedData };
+	}
+
+	async updateTypePicture(id: number, file: Express.Multer.File) {
+		const extention = this.getExtension(file.originalname);
+
+		const fileName = uuidv4() + `.${extention}`;
+
+		const filePath = join(__dirname, "..", "uploads", fileName);
+		if (extention) {
+			rename(file.path, filePath, (err) => {
+				if (err) {
+					console.error(err);
+					throw new HttpException("ошибка при чтении файла", HttpStatus.BAD_REQUEST);
+				}
+				console.log(`переименован успешно`);
+			});
+		}
+
+		const type = await this.typeRepository.findOne({ where: { id } });
+
+		type.fileName = fileName;
 		await type.save();
-		return { message: "данные успещно обновлены" };
+
+		return {
+			message: "изображение успешно изменено",
+			id: type.id,
+			fileName,
+		};
+	}
+
+	//require userId in param "id"
+	async setTypesSetting(dto: CreateSettingsDto) {
+		const operator = await this.userRepository.findOne({
+			where: { id: dto.userId },
+			include: [OperatorSettings],
+		});
+
+		if (operator.operatorSettings)
+			throw new HttpException("настройки уже заложены", HttpStatus.BAD_REQUEST);
+
+		if (!operator) throw new HttpException("не найден", HttpStatus.BAD_REQUEST);
+
+		if (operator.role !== "operator")
+			throw new HttpException("пользователь не подходящий роли", HttpStatus.BAD_REQUEST);
+
+		const operatorSettings = await this.operatorSettingsRepository.create(dto);
+
+		return {
+			message: "Настройки успешно добавлены",
+			operatorSettings,
+		};
+	}
+
+	async updateTyepsSettings(dto: CreateSettingsDto) {
+		const operator = await this.userRepository.findOne({
+			where: { id: dto.userId },
+			include: [OperatorSettings],
+		});
+		if (!operator) throw new HttpException("оператор не найден", HttpStatus.BAD_REQUEST);
+
+		if (!operator.operatorSettings)
+			throw new HttpException("настройки не заложены", HttpStatus.BAD_REQUEST);
+
+		await operator.operatorSettings.update({ ...dto });
+		await operator.operatorSettings.save();
+
+		return {
+			message: "настройки успешно обновлены",
+			operatorSettings: operator.operatorSettings,
+		};
 	}
 }

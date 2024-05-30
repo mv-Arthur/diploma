@@ -1,6 +1,6 @@
 import { observer } from "mobx-react-lite";
 import React from "react";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { typeStore } from "../../store/typeStore";
 import { API_URL } from "../../http";
 import classes from "./fullType.module.css";
@@ -15,6 +15,11 @@ import Snackbar from "@mui/material/Snackbar";
 import Alert from "@mui/material/Alert";
 import GroupRemoveIcon from "@mui/icons-material/GroupRemove";
 import GroupAddIcon from "@mui/icons-material/GroupAdd";
+import FileUploadIcon from "@mui/icons-material/FileUpload";
+import DeleteIcon from "@mui/icons-material/Delete";
+import { OperatorSettings } from "../../components/operatorSettings/OperatorSettings";
+import { H2 } from "../../components/h2/H2";
+
 type FormValuesType = {
 	name: string;
 	minPrice: string;
@@ -38,14 +43,16 @@ export const FullType = observer(() => {
 	const [editMode, setEditMode] = React.useState(false);
 	const [formData, setFormData] = React.useState<FormValuesType>({} as FormValuesType);
 	const [current, setCurrent] = React.useState<GetAllOrdersResponse>({} as GetAllOrdersResponse);
-
+	const inputFileRef = React.useRef<null | HTMLInputElement>(null);
+	const navigate = useNavigate();
 	const params = useParams();
 	const typeId = Number(params.id);
 	const type = React.useMemo(() => {
 		const founded = typeStore.types.find((type) => type.id === typeId);
 		if (founded) setFormData(new FormDto(founded));
 		return founded;
-	}, [typeId]);
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [typeId, typeStore.types]);
 
 	const operators = React.useMemo(
 		() =>
@@ -62,7 +69,7 @@ export const FullType = observer(() => {
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 		[orderAdminStore.ordersForUsers]
 	);
-	console.log(operators);
+
 	React.useEffect(() => {
 		const cb = (e: KeyboardEvent) => {
 			if (e.key === "Escape") setCurrent({} as GetAllOrdersResponse);
@@ -73,7 +80,10 @@ export const FullType = observer(() => {
 		return () => document.removeEventListener("keydown", cb);
 	}, []);
 
-	const switchEditMode = (bol: boolean) => setEditMode(bol);
+	const switchEditMode = (bol: boolean) => {
+		setEditMode(bol);
+		if (!bol) typeStore.fetchToUpdateType(typeId, formData);
+	};
 
 	const onAttach = async (userId: number, typeId: number) => {
 		await orderAdminStore.fetchToAttach(userId, typeId);
@@ -81,6 +91,14 @@ export const FullType = observer(() => {
 
 	const onUnattach = async (id: number) => {
 		await orderAdminStore.fetchToUnattach(id);
+	};
+
+	const onInputChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
+		const formData = new FormData();
+		if (event.currentTarget.files) {
+			formData.append("file", event.currentTarget.files[0]);
+			await typeStore.fetchToUpdatePicture(typeId, formData);
+		}
 	};
 
 	const changeAction = (type: ChangeActionType, value: string) => {
@@ -94,6 +112,11 @@ export const FullType = observer(() => {
 			case "name":
 				setFormData((prev) => ({ ...prev, name: value }));
 		}
+	};
+
+	const onDelete = async () => {
+		typeStore.fetchToDelete(typeId);
+		navigate("/types");
 	};
 
 	return (
@@ -129,7 +152,26 @@ export const FullType = observer(() => {
 							</Button>
 						</div>
 						<div className={classes.imgBlock}>
-							<img src={`${API_URL}/uploads/${type?.fileName}`} alt="type promo" />
+							<img
+								src={`${API_URL}/uploads/${type?.fileName}`}
+								style={{ position: "relative" }}
+								alt="type promo"
+							/>
+							<input
+								type="file"
+								onChange={onInputChange}
+								ref={inputFileRef}
+								style={{ display: "none" }}
+							/>
+							<Button
+								style={{ position: "absolute", left: "10px", top: "10px" }}
+								onClick={() => {
+									inputFileRef?.current?.click();
+								}}
+								variant={"contained"}
+							>
+								<FileUploadIcon />
+							</Button>
 						</div>
 						<div className={classes.grid}>
 							<div className={classes.promoItem + " " + classes.name}>
@@ -176,8 +218,10 @@ export const FullType = observer(() => {
 									<p>{type.description}</p>
 								)}
 							</div>
+							<Button onClick={onDelete} color="error" variant="contained">
+								удалить <DeleteIcon style={{ transform: "translate(2px, -1px)" }} />
+							</Button>
 						</div>
-						<div></div>
 					</div>
 				) : (
 					<div>не найдено</div>
@@ -186,7 +230,7 @@ export const FullType = observer(() => {
 			<div className={classes.right}>
 				{attachedOperator ? (
 					<div>
-						<div className={classes.rightHeader}>За обработку этих заявок отвечает:</div>
+						<H2 type="basic">За обработку этих заявок отвечает:</H2>
 						<div className={classes.attachedOperator} style={{ cursor: "default" }}>
 							<div className={classes.attachedInfoBlock}>
 								<img
@@ -217,11 +261,15 @@ export const FullType = observer(() => {
 								</Button>
 							</div>
 						</div>
-						<div>here</div>
+
+						<OperatorSettings
+							userId={attachedOperator.id}
+							settings={attachedOperator.operatorSettings}
+						/>
 					</div>
 				) : (
 					<div>
-						<div className={classes.rightHeader}>Закрепите оператора за услугой</div>
+						<H2 type="dungerous">Закрепите оператора за услугой</H2>
 						<Button
 							style={{ display: "block", margin: "0 auto", marginTop: "20px" }}
 							disabled={!current.id}

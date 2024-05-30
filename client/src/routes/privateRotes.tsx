@@ -1,15 +1,11 @@
 import React, { useContext } from "react";
 import { Route, Routes } from "react-router-dom";
 import UserPage from "../pages/userPage/UserPage";
-import Container from "@mui/material/Container";
 import { LoginPage } from "../pages/LoginPage";
 import { observer } from "mobx-react-lite";
 import { Context } from "..";
 import AdminPage from "../pages/AdminPage";
 import CHeader from "../components/CHeader";
-import { CreateTypeForm } from "../components/createTypeForm/CreateTypeForm";
-import { TypesArea } from "../components/typesArea/TypesArea";
-import Typography from "@mui/material/Typography";
 import { Office } from "../pages/office/Office";
 import { RoleType } from "../models/RoleType";
 import { AccountingPage } from "../pages/accounting/AccountingPage";
@@ -19,6 +15,7 @@ import { FullType } from "../pages/fullType/FullType";
 import { orderAdminStore } from "../store/orderAdminStore";
 
 import { TypesPage } from "../pages/TypesPage";
+import { OperatorPage } from "../pages/OperatorPage";
 
 const PrivateRoutes: React.FC = () => {
 	const { store } = useContext(Context);
@@ -33,8 +30,13 @@ const PrivateRoutes: React.FC = () => {
 	const choise = (role: RoleType) => {
 		if (role === "user") return <Route path={"/user"} element={<UserPage />} />;
 		if (role === "admin") {
-			orderAdminStore.fetchingOrders();
+			(async () => await orderAdminStore.fetchingOrders())();
 			return <Route path={"/user"} element={<AdminPage />} />;
+		}
+
+		if (role === "operator") {
+			(async () => await orderAdminStore.fetchingOrders())();
+			return <Route path={"/user"} element={<OperatorPage />} />;
 		}
 		if (role === "accounting") return <Route path={"/user"} element={<AccountingPage />} />;
 	};

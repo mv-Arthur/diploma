@@ -1,3 +1,5 @@
+import { AddOrderResponse } from "./response/AddOrderResponse";
+
 export interface IOrderType extends IType {
 	id: number;
 
@@ -11,6 +13,6 @@ export interface IType {
 	minPrice: string;
 }
 
-export interface DeletedType {
+export interface DeletedType extends AddOrderResponse {
 	deletedTypeId: number;
 }

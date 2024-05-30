@@ -7,7 +7,7 @@ import { AddOrderDto } from "./dto/addOrder.dto";
 import { SetPriceDto } from "./dto/setPrice.dto";
 import { SetStatusDto } from "./dto/setStatus.dto";
 import { updateDescriptionDto } from "./dto/updateDescription.dto";
-import { CreateTypeDto, TypeDto } from "./dto/createType.dto";
+import { CreateSettingsDto, CreateTypeDto, TypeDto } from "./dto/createType.dto";
 import { AvatarDto, nameDto, patronymicDto, phoneNumberDto, surnameDto } from "./dto/personalCreation.dto";
 import { BotService } from "./service/bot.service";
 import { SwtichRoleDto } from "./dto/switchRole.dto";
@@ -59,6 +59,7 @@ export declare class UserController {
         typeId: number;
         email: string;
         role: import("./types/RoleType").RoleType;
+        operatorSettings: import("./model/operatorSettings.model").OperatorSettings;
         personal: import("./dto/personalCreation.dto").PersonalDto;
         order: ({
             id: number;
@@ -100,6 +101,7 @@ export declare class UserController {
     download(orderId: number, res: Response): Promise<void>;
     getTypeAll(): Promise<import("./model/type.model").Type[]>;
     deleteTypeById(id: number): Promise<{
+        message: string;
         deletedTypeId: number;
     }>;
     testToGetUsersByAdmin(): Promise<import("./model/user.model").User[]>;
@@ -137,5 +139,20 @@ export declare class UserController {
     }>;
     updateType(id: number, dto: TypeDto): Promise<{
         message: string;
+        id: number;
+        requestedData: import("./dto/createType.dto").CreationTypeDto;
+    }>;
+    updateTypePicture(id: number, file: Express.Multer.File): Promise<{
+        message: string;
+        id: number;
+        fileName: string;
+    }>;
+    setTypesSetting(dto: CreateSettingsDto): Promise<{
+        message: string;
+        operatorSettings: import("./model/operatorSettings.model").OperatorSettings;
+    }>;
+    updateTypesSettings(dto: CreateSettingsDto): Promise<{
+        message: string;
+        operatorSettings: import("./model/operatorSettings.model").OperatorSettings;
     }>;
 }

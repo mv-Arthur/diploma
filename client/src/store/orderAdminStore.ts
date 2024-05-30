@@ -1,11 +1,15 @@
 import { makeAutoObservable } from "mobx";
-import { GetAllOrdersResponse } from "../models/response/GetAllOrdersResponse";
+import {
+	GetAllOrdersResponse,
+	Settings,
+	setTypeSettingsBody,
+} from "../models/response/GetAllOrdersResponse";
 import { OrderAdminService } from "../services/OrderAdminService";
 import { RoleType } from "../models/RoleType";
 import { isAxiosError } from "axios";
 import { AlertProps } from "@mui/material/Alert";
 
-interface ErrorModel {
+export interface ErrorModel {
 	message: string;
 	statusCode: string;
 }
@@ -82,6 +86,40 @@ class OrderAdminStore {
 		});
 	}
 
+	setSettings(body: Settings) {
+		this.ordersForUsers = this.ordersForUsers.map((user) => {
+			if (user.id === body.userId) {
+				return { ...user, operatorSettings: body };
+			}
+
+			return user;
+		});
+	}
+
+	async fetchToSetSettings(body: setTypeSettingsBody) {
+		try {
+			const response = await OrderAdminService.setTypesSetting(body);
+			this.setSettings(response.data.operatorSettings);
+			this.setSnackBar({ children: response.data.message, severity: "success" });
+		} catch (err) {
+			if (isAxiosError<ErrorModel>(err)) {
+				this.setSnackBar({ children: err.response?.data.message, severity: "error" });
+			}
+		}
+	}
+
+	async fetchToUpdateSettings(body: setTypeSettingsBody) {
+		try {
+			const response = await OrderAdminService.updateTypesSettings(body);
+			this.setSettings(response.data.operatorSettings);
+			this.setSnackBar({ children: response.data.message, severity: "success" });
+		} catch (err) {
+			if (isAxiosError<ErrorModel>(err)) {
+				this.setSnackBar({ children: err.response?.data.message, severity: "error" });
+			}
+		}
+	}
+
 	//typeid is require in param
 	async fetchToUnattach(id: number) {
 		try {
@@ -139,6 +177,7 @@ class OrderAdminStore {
 		try {
 			const response = await OrderAdminService.getAllOrders();
 			this.addMany(response.data);
+			console.log(response.data);
 			return response;
 		} catch (err) {
 			console.log(err);

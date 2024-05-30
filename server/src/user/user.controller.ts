@@ -14,6 +14,7 @@ import {
 	Patch,
 	HttpException,
 	Delete,
+	Put,
 } from "@nestjs/common";
 import { Response, Request } from "express";
 import { UserService } from "./service/user.service";
@@ -27,7 +28,7 @@ import { RoleGuard } from "./role.guard";
 import { SetPriceDto } from "./dto/setPrice.dto";
 import { SetStatusDto } from "./dto/setStatus.dto";
 import { updateDescriptionDto } from "./dto/updateDescription.dto";
-import { CreateTypeDto, TypeDto } from "./dto/createType.dto";
+import { CreateSettingsDto, CreateTypeDto, TypeDto } from "./dto/createType.dto";
 import {
 	AvatarDto,
 	nameDto,
@@ -382,7 +383,23 @@ export class UserController {
 	}
 
 	@Patch("/types/:id")
-	async updateType(@Param("id") id: number, dto: TypeDto) {
+	async updateType(@Param("id") id: number, @Body() dto: TypeDto) {
 		return await this.orderService.updateType(id, dto);
+	}
+
+	@Patch("/typesPciture/:id")
+	@UseInterceptors(FileInterceptor("file"))
+	async updateTypePicture(@Param("id") id: number, @UploadedFile() file: Express.Multer.File) {
+		return await this.orderService.updateTypePicture(id, file);
+	}
+
+	@Post("/types/setting")
+	async setTypesSetting(@Body() dto: CreateSettingsDto) {
+		return await this.orderService.setTypesSetting(dto);
+	}
+
+	@Patch("/typesSettings")
+	async updateTypesSettings(@Body() dto: CreateSettingsDto) {
+		return await this.orderService.updateTyepsSettings(dto);
 	}
 }

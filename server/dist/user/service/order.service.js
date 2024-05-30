@@ -28,13 +28,15 @@ const webPush = require("web-push");
 const vapid_model_1 = require("../model/vapid.model");
 const subscription_model_1 = require("../model/subscription.model");
 const keys_model_1 = require("../model/keys.model");
+const createType_dto_1 = require("../dto/createType.dto");
 const personal_model_1 = require("../model/personal.model");
 const personalCreation_dto_1 = require("../dto/personalCreation.dto");
 const report_model_1 = require("../model/report.model");
 const dateU_model_1 = require("../model/dateU.model");
 const sequelize_typescript_1 = require("sequelize-typescript");
+const operatorSettings_model_1 = require("../model/operatorSettings.model");
 let OrderService = class OrderService {
-    constructor(orderRepository, userRepository, fileRepository, statusRepository, typeRepository, reportRepository, dateURepository, sequelize) {
+    constructor(orderRepository, userRepository, fileRepository, statusRepository, typeRepository, reportRepository, dateURepository, operatorSettingsRepository, sequelize) {
         this.orderRepository = orderRepository;
         this.userRepository = userRepository;
         this.fileRepository = fileRepository;
@@ -42,6 +44,7 @@ let OrderService = class OrderService {
         this.typeRepository = typeRepository;
         this.reportRepository = reportRepository;
         this.dateURepository = dateURepository;
+        this.operatorSettingsRepository = operatorSettingsRepository;
         this.sequelize = sequelize;
     }
     getExtension(filename) {
@@ -256,11 +259,19 @@ let OrderService = class OrderService {
         const type = await this.typeRepository.findOne({ where: { id } });
         if (!type)
             throw new common_1.HttpException("типы не найдены", common_1.HttpStatus.BAD_REQUEST);
+        await this.unattachType(type.id);
         const delCount = await this.typeRepository.destroy({ where: { id: type.id } });
+        const orders = await this.orderRepository.findAll({ include: [file_model_1.File] });
+        await Promise.all(orders.map((order) => {
+            if (order.file.type === type.type) {
+                order.destroy();
+            }
+        }));
         if (!delCount) {
             throw new common_1.HttpException("типы не найдены", common_1.HttpStatus.BAD_REQUEST);
         }
         return {
+            message: "успешно удален",
             deletedTypeId: type.id,
         };
     }
@@ -298,6 +309,7 @@ let OrderService = class OrderService {
                     model: order_model_1.Order,
                     include: [status_model_1.Status, file_model_1.File],
                 },
+                operatorSettings_model_1.OperatorSettings,
             ],
         });
         const types = await this.typeRepository.findAll();
@@ -308,6 +320,7 @@ let OrderService = class OrderService {
                 typeId: user.typeId,
                 email: user.email,
                 role: user.role,
+                operatorSettings: user.operatorSettings,
                 personal: new personalCreation_dto_1.PersonalDto(user.personal),
                 order: order.map((order) => {
                     const { status, file } = order;
@@ -468,8 +481,63 @@ let OrderService = class OrderService {
         if (!type)
             throw new common_1.HttpException("тип не найден", common_1.HttpStatus.BAD_REQUEST);
         await type.update({ ...dto });
+        const requestedData = new createType_dto_1.CreationTypeDto(type);
+        return { message: "данные успешно обновлены", id: type.id, requestedData };
+    }
+    async updateTypePicture(id, file) {
+        const extention = this.getExtension(file.originalname);
+        const fileName = (0, uuid_1.v4)() + `.${extention}`;
+        const filePath = (0, path_1.join)(__dirname, "..", "uploads", fileName);
+        if (extention) {
+            (0, fs_1.rename)(file.path, filePath, (err) => {
+                if (err) {
+                    console.error(err);
+                    throw new common_1.HttpException("ошибка при чтении файла", common_1.HttpStatus.BAD_REQUEST);
+                }
+                console.log(`переименован успешно`);
+            });
+        }
+        const type = await this.typeRepository.findOne({ where: { id } });
+        type.fileName = fileName;
         await type.save();
-        return { message: "данные успещно обновлены" };
+        return {
+            message: "изображение успешно изменено",
+            id: type.id,
+            fileName,
+        };
+    }
+    async setTypesSetting(dto) {
+        const operator = await this.userRepository.findOne({
+            where: { id: dto.userId },
+            include: [operatorSettings_model_1.OperatorSettings],
+        });
+        if (operator.operatorSettings)
+            throw new common_1.HttpException("настройки уже заложены", common_1.HttpStatus.BAD_REQUEST);
+        if (!operator)
+            throw new common_1.HttpException("не найден", common_1.HttpStatus.BAD_REQUEST);
+        if (operator.role !== "operator")
+            throw new common_1.HttpException("пользователь не подходящий роли", common_1.HttpStatus.BAD_REQUEST);
+        const operatorSettings = await this.operatorSettingsRepository.create(dto);
+        return {
+            message: "Настройки успешно добавлены",
+            operatorSettings,
+        };
+    }
+    async updateTyepsSettings(dto) {
+        const operator = await this.userRepository.findOne({
+            where: { id: dto.userId },
+            include: [operatorSettings_model_1.OperatorSettings],
+        });
+        if (!operator)
+            throw new common_1.HttpException("оператор не найден", common_1.HttpStatus.BAD_REQUEST);
+        if (!operator.operatorSettings)
+            throw new common_1.HttpException("настройки не заложены", common_1.HttpStatus.BAD_REQUEST);
+        await operator.operatorSettings.update({ ...dto });
+        await operator.operatorSettings.save();
+        return {
+            message: "настройки успешно обновлены",
+            operatorSettings: operator.operatorSettings,
+        };
     }
 };
 exports.OrderService = OrderService;
@@ -482,6 +550,7 @@ exports.OrderService = OrderService = __decorate([
     __param(4, (0, sequelize_1.InjectModel)(type_model_1.Type)),
     __param(5, (0, sequelize_1.InjectModel)(report_model_1.Report)),
     __param(6, (0, sequelize_1.InjectModel)(dateU_model_1.DateU)),
-    __metadata("design:paramtypes", [Object, Object, Object, Object, Object, Object, Object, sequelize_typescript_1.Sequelize])
+    __param(7, (0, sequelize_1.InjectModel)(operatorSettings_model_1.OperatorSettings)),
+    __metadata("design:paramtypes", [Object, Object, Object, Object, Object, Object, Object, Object, sequelize_typescript_1.Sequelize])
 ], OrderService);
 //# sourceMappingURL=order.service.js.map

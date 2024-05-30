@@ -34,6 +34,7 @@ const bot_service_1 = require("./service/bot.service");
 const dateU_model_1 = require("./model/dateU.model");
 const report_model_1 = require("./model/report.model");
 const organisation_model_1 = require("./model/organisation.model");
+const operatorSettings_model_1 = require("./model/operatorSettings.model");
 let UserModule = class UserModule {
 };
 exports.UserModule = UserModule;
@@ -67,6 +68,7 @@ exports.UserModule = UserModule = __decorate([
                 dateU_model_1.DateU,
                 report_model_1.Report,
                 organisation_model_1.Organization,
+                operatorSettings_model_1.OperatorSettings,
             ]),
             platform_express_1.MulterModule.register({
                 dest: "./dist/user/uploads",

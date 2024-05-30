@@ -17,6 +17,7 @@ const vapid_model_1 = require("./vapid.model");
 const subscription_model_1 = require("./subscription.model");
 const personal_model_1 = require("./personal.model");
 const type_model_1 = require("./type.model");
+const operatorSettings_model_1 = require("./operatorSettings.model");
 let User = class User extends sequelize_typescript_1.Model {
 };
 exports.User = User;
@@ -82,6 +83,10 @@ __decorate([
     (0, sequelize_typescript_1.Column)({ type: sequelize_typescript_1.DataType.INTEGER }),
     __metadata("design:type", Number)
 ], User.prototype, "typeId", void 0);
+__decorate([
+    (0, sequelize_typescript_1.HasOne)(() => operatorSettings_model_1.OperatorSettings),
+    __metadata("design:type", operatorSettings_model_1.OperatorSettings)
+], User.prototype, "operatorSettings", void 0);
 exports.User = User = __decorate([
     (0, sequelize_typescript_1.Table)({ tableName: "user", timestamps: false })
 ], User);

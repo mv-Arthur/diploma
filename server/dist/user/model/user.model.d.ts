@@ -5,6 +5,7 @@ import { Order } from "./order.model";
 import { Vapid } from "./vapid.model";
 import { Subscription } from "./subscription.model";
 import { Personal } from "./personal.model";
+import { OperatorSettings } from "./operatorSettings.model";
 interface CreationAttrs {
     email: string;
     password: string;
@@ -26,5 +27,6 @@ export declare class User extends Model<User, CreationAttrs> {
     subscription: Subscription;
     personal: Personal;
     typeId: number;
+    operatorSettings: OperatorSettings;
 }
 export {};

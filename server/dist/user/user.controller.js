@@ -272,6 +272,15 @@ let UserController = class UserController {
     async updateType(id, dto) {
         return await this.orderService.updateType(id, dto);
     }
+    async updateTypePicture(id, file) {
+        return await this.orderService.updateTypePicture(id, file);
+    }
+    async setTypesSetting(dto) {
+        return await this.orderService.setTypesSetting(dto);
+    }
+    async updateTypesSettings(dto) {
+        return await this.orderService.updateTyepsSettings(dto);
+    }
 };
 exports.UserController = UserController;
 __decorate([
@@ -572,10 +581,34 @@ __decorate([
 __decorate([
     (0, common_1.Patch)("/types/:id"),
     __param(0, (0, common_1.Param)("id")),
+    __param(1, (0, common_1.Body)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [Number, createType_dto_1.TypeDto]),
     __metadata("design:returntype", Promise)
 ], UserController.prototype, "updateType", null);
+__decorate([
+    (0, common_1.Patch)("/typesPciture/:id"),
+    (0, common_1.UseInterceptors)((0, platform_express_1.FileInterceptor)("file")),
+    __param(0, (0, common_1.Param)("id")),
+    __param(1, (0, common_1.UploadedFile)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Number, Object]),
+    __metadata("design:returntype", Promise)
+], UserController.prototype, "updateTypePicture", null);
+__decorate([
+    (0, common_1.Post)("/types/setting"),
+    __param(0, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [createType_dto_1.CreateSettingsDto]),
+    __metadata("design:returntype", Promise)
+], UserController.prototype, "setTypesSetting", null);
+__decorate([
+    (0, common_1.Patch)("/typesSettings"),
+    __param(0, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [createType_dto_1.CreateSettingsDto]),
+    __metadata("design:returntype", Promise)
+], UserController.prototype, "updateTypesSettings", null);
 exports.UserController = UserController = __decorate([
     (0, common_1.Controller)("user"),
     __metadata("design:paramtypes", [user_service_1.UserService,

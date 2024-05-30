@@ -6,6 +6,7 @@ import { Vapid } from "./vapid.model";
 import { Subscription } from "./subscription.model";
 import { Personal } from "./personal.model";
 import { Type } from "./type.model";
+import { OperatorSettings } from "./operatorSettings.model";
 
 interface CreationAttrs {
 	email: string;
@@ -50,4 +51,7 @@ export class User extends Model<User, CreationAttrs> {
 	@ForeignKey(() => Type)
 	@Column({ type: DataType.INTEGER })
 	typeId: number;
+
+	@HasOne(() => OperatorSettings)
+	operatorSettings: OperatorSettings;
 }

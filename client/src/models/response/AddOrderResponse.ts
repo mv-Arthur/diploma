@@ -5,3 +5,7 @@ export interface AddOrderResponse {
 export interface UnattachType extends AddOrderResponse {
 	id: number;
 }
+
+export interface UpdatePicture extends UnattachType {
+	fileName: string;
+}
